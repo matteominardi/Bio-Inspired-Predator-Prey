@@ -6,10 +6,10 @@ public class Raycast : MonoBehaviour
 {
     //[SerializeField] LayerMask layerMask;
     //private GameObject parent;
-    private int numberOfRays;
+    private int numberOfRays = 24;
     private Vector3[] rays;
     private float[] angles;
-    private int fov;
+    private int fov = 300;
     private int viewRange;
 
     public void Generate(int numberOfRays, int fov, int viewRange)
@@ -32,7 +32,7 @@ public class Raycast : MonoBehaviour
             //print("i " + i +  " angle " + angle );
             rays[i] = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
             angles[i] = angle;
-            //Debug.DrawRay(transform.position, rays[i] * viewRange, Color.white, 30f);
+            Debug.DrawRay(transform.position, rays[i] * viewRange, Color.white, 30f);
         }
     }
 

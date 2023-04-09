@@ -6,12 +6,12 @@ public class Prey : MonoBehaviour
 {
     private NeuralNetwork Brain;
     // private Raycast[] inputs;
-    public int Lifepoints { get; private set; }
-    public double Fitness { get; private set; }
-    public bool Alive { get; private set; }
+    [SerializeField] public int Lifepoints { get; private set; }
+    [SerializeField]public double Fitness { get; private set; }
+    [SerializeField] public bool Alive { get; private set; }
 
-    public float Energy { get; private set; }
-    public double Speed { get; private set; }
+    [SerializeField] public float Energy { get; private set; }
+    [SerializeField] public double Speed { get; private set; }
 
     // Start is called before the first frame update
     void Start()
@@ -23,7 +23,7 @@ public class Prey : MonoBehaviour
         Energy = 100;
         Speed = 2;
 
-        GetComponent<Raycast>().Generate(24, 300, 30);
+        GetComponent<Raycast>().Generate(24, 300, 100);
     }
 
     // Update is called once per frame

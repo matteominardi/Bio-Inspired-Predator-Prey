@@ -6,12 +6,12 @@ public class Predator : MonoBehaviour
 {
     private NeuralNetwork brain;
     // private Raycast[] inputs;
-    public int Lifepoints { get; private set; }
+    [SerializeField] public int Lifepoints { get; private set; }
     public double Fitness { get; private set; }
     public bool Alive { get; private set; }
 
-    public float Energy { get; private set; }
-    public double Speed { get; private set; }
+    [SerializeField] public float Energy { get; private set; }
+    [SerializeField] public double Speed { get; private set; }
 
     void Start()
     {
@@ -22,7 +22,7 @@ public class Predator : MonoBehaviour
         Energy = 100;
         Speed = 3;
 
-        GetComponent<Raycast>().Generate(24, 90, 60);
+        GetComponent<Raycast>().Generate(24, 90, 30);
     }
 
     // Update is called once per frame

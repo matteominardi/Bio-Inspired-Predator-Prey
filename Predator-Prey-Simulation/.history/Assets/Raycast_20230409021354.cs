@@ -32,7 +32,7 @@ public class Raycast : MonoBehaviour
             //print("i " + i +  " angle " + angle );
             rays[i] = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
             angles[i] = angle;
-            //Debug.DrawRay(transform.position, rays[i] * viewRange, Color.white, 30f);
+            Debug.DrawRay(transform.position, rays[i] * viewRange, Color.white, 30f);
         }
     }
 

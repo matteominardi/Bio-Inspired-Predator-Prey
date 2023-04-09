@@ -7,7 +7,7 @@ public class Prey : MonoBehaviour
     private NeuralNetwork Brain;
     // private Raycast[] inputs;
     public int Lifepoints { get; private set; }
-    public double Fitness { get; private set; }
+    ublic double Fitness { get; private set; }
     public bool Alive { get; private set; }
 
     public float Energy { get; private set; }
@@ -23,7 +23,7 @@ public class Prey : MonoBehaviour
         Energy = 100;
         Speed = 2;
 
-        GetComponent<Raycast>().Generate(24, 300, 30);
+        GetComponent<Raycast>().Generate(24, 300, 100);
     }
 
     // Update is called once per frame

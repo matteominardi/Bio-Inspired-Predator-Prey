@@ -10,8 +10,8 @@ public class Predator : MonoBehaviour
     public double Fitness { get; private set; }
     public bool Alive { get; private set; }
 
-    public float Energy { get; private set; }
-    public double Speed { get; private set; }
+    [SerializeField] public float Energy { get; private set; }
+    [SerializeField] public double Speed { public get; private set; }
 
     void Start()
     {
@@ -22,7 +22,7 @@ public class Predator : MonoBehaviour
         Energy = 100;
         Speed = 3;
 
-        GetComponent<Raycast>().Generate(24, 90, 60);
+        GetComponent<Raycast>().Generate(24, 90, 30);
     }
 
     // Update is called once per frame
@@ -35,7 +35,7 @@ public class Predator : MonoBehaviour
     {
         if (collision.gameObject.name == "Predator")
         {
-            print("I hit a Predator");
+            print("I hit aPredator");
         }
         else if (collision.gameObject.name == "Prey")
         {

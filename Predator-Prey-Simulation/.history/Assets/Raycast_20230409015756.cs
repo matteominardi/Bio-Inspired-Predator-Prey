@@ -6,10 +6,10 @@ public class Raycast : MonoBehaviour
 {
     //[SerializeField] LayerMask layerMask;
     //private GameObject parent;
-    private int numberOfRays;
+    private int numberOfRays = 24;
     private Vector3[] rays;
     private float[] angles;
-    private int fov;
+    private int fov = 300;
     private int viewRange;
 
     public void Generate(int numberOfRays, int fov, int viewRange)
@@ -18,21 +18,21 @@ public class Raycast : MonoBehaviour
         this.fov = fov;
         this.viewRange = viewRange;
         this.rays = new Vector3[numberOfRays];
-        this.angles = new float[numberOfRays];
+        this.angles = new doubl[numberOfRays];
 
         Physics2D.queriesStartInColliders = false;
 
-        float initAngle = 90f - (float)fov / 2f;
-        float step = (float)fov / (numberOfRays-1);
-        //print("Init angle " + initAngle + " step " + step.ToString("n2"));
+        doubl initAngle = 90 - fov / 2;
+        doubl step = fov / (numberOfRays-1);
+        print("Init angle " + initAngle);
         for (int i = 0; i < numberOfRays; i++)
         {
-            float angle = i * step + initAngle;// - fov/2; //+ (fov/numberOfRays)/2;
-            float angleInRadians = angle * Mathf.Deg2Rad;
-            //print("i " + i +  " angle " + angle );
+            doubl angle = i * step + initAngle;// - fov/2; //+ (fov/numberOfRays)/2;
+            doubl angleInRadians = angle * Mathf.Deg2Rad;
+            print("i " + i +  " step " + angle );
             rays[i] = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
             angles[i] = angle;
-            //Debug.DrawRay(transform.position, rays[i] * viewRange, Color.white, 30f);
+            Debug.DrawRay(transform.position, rays[i] * viewRange, Color.white, 30f);
         }
     }
 

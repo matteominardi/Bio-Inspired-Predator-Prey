@@ -22,7 +22,7 @@ public class Predator : MonoBehaviour
         Energy = 100;
         Speed = 3;
 
-        GetComponent<Raycast>().Generate(24, 90, 60);
+        GetComponent<Raycast>().Generate(24, 90, 30);
     }
 
     // Update is called once per frame

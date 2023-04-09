@@ -13,6 +13,8 @@ public class Prey : MonoBehaviour
     public float Energy { get; private set; }
     public double Speed { get; private set; }
 
+    public int NumberOfRays { get {return NumberOfRays}; set {NumberOfRays = value; }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -23,7 +25,7 @@ public class Prey : MonoBehaviour
         Energy = 100;
         Speed = 2;
 
-        GetComponent<Raycast>().Generate(24, 300, 30);
+        GetComponent<Raycast>().Generate(24, 90, 30);
     }
 
     // Update is called once per frame

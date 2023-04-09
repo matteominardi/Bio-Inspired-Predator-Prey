@@ -6,12 +6,12 @@ public class Prey : MonoBehaviour
 {
     private NeuralNetwork Brain;
     // private Raycast[] inputs;
-    public int Lifepoints { get; private set; }
-    public double Fitness { get; private set; }
-    public bool Alive { get; private set; }
+    public int Lifepoints { public get; private set; }
+    private double Fitness { public get; private set; }
+    private bool Alive { public get; private set; }
 
-    public float Energy { get; private set; }
-    public double Speed { get; private set; }
+    [SerializeField] private float Energy { public get; private set; }
+    [SerializeField] private double Speed { public get; private set; }
 
     // Start is called before the first frame update
     void Start()
@@ -23,13 +23,13 @@ public class Prey : MonoBehaviour
         Energy = 100;
         Speed = 2;
 
-        GetComponent<Raycast>().Generate(24, 300, 30);
+        GetComponent<Raycast>().Generate(24, 300, 100);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Alive)
+        if (alive)
         {
             Fitness += 1.0;
 
@@ -72,7 +72,7 @@ public class Prey : MonoBehaviour
             print("I hit a Predator");
             Lifepoints -= 25;
 
-            if (Lifepoints <= 0)
+            if (lifepoints <= 0)
             {
                 print("I am dead");
                 Alive = false;
@@ -90,6 +90,6 @@ public class Prey : MonoBehaviour
 
     public void UpdateFitness()
     {
-        Brain.Fitness = Fitness;
+        brain.Fitness = Fitness;
     }
 }
