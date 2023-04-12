@@ -25,35 +25,36 @@ public class Prey : MonoBehaviour, ISelectable
     public double Speed { get; private set; }
     public int Generation { get; private set; }
 
-    private bool energyExhausted = false;
+    private bool _energyExhausted = false;
 
-    private float age;
+    private float _age;
 
     // Start is called before the first frame update
     public void Start()
     {
         print(name);
-        Brain = new NeuralNetwork(new[]{24, 5, 3});
+        Brain = new NeuralNetwork(new[] { 24, 5, 3 });
         Lifepoints = 100;
         Fitness = 0;
         Alive = true;
         Energy = 100;
         Speed = 2;
         Generation = 1;
-        age = Time.time;
+        _age = Time.time;
 
         GetComponent<Raycast>().Generate(24, 300, 30);
     }
 
-    public void Generate(int generation) {
-        Brain = new NeuralNetwork(new[]{24, 5, 3});
+    public void Generate(int generation)
+    {
+        Brain = new NeuralNetwork(new[] { 24, 5, 3 });
         Lifepoints = 100;
         Fitness = 0;
         Alive = true;
         Energy = 100;
         Speed = 2;
         Generation = generation;
-        age = Time.time;
+        _age = Time.time;
 
         GetComponent<Raycast>().Generate(24, 300, 30);
     }
@@ -63,30 +64,30 @@ public class Prey : MonoBehaviour, ISelectable
     {
         if (!Alive)
             return;
-        
+
         Fitness += 1.0 * Time.deltaTime;
 
-        if ((Time.time - age) > 10)
+        if ((Time.time - _age) > 10)
         {
-            age = Time.time;
+            _age = Time.time;
             Reproduce(Brain, Generation);
         }
 
-        if (Energy <= 0f) 
+        if (Energy <= 0f)
         {
             GetComponent<Raycast>().UpdateRays(0);
             Energy += 5f * Time.deltaTime;
-            energyExhausted = true;
+            _energyExhausted = true;
             GetComponent<SpriteRenderer>().color = new Color(0, 0.3f, 0);
             return;
         }
-        
-        if (Energy < 10f && energyExhausted)
+
+        if (Energy < 10f && _energyExhausted)
         {
             Energy += 5f * Time.deltaTime;
-            if (Energy >= 10f) 
+            if (Energy >= 10f)
             {
-                energyExhausted = false;
+                _energyExhausted = false;
                 GetComponent<SpriteRenderer>().color = new Color(0, 1, 0);
             }
             return;
@@ -121,10 +122,12 @@ public class Prey : MonoBehaviour, ISelectable
             transform.Translate(Vector2.down * Time.deltaTime * 2 * (int)Speed);
             GetComponent<Raycast>().UpdateRays(0);
         }
-        if (!(Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.DownArrow))) {
+        if (!(Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.DownArrow)))
+        {
             if (Energy <= 100)
                 Energy = Mathf.Min(Energy + 5f * Time.deltaTime, 100);
-        } else 
+        }
+        else
         {
             Energy -= 10f * Time.deltaTime;
         }
@@ -138,7 +141,7 @@ public class Prey : MonoBehaviour, ISelectable
         dir = -dir.normalized;
         // And finally we add force in the direction of dir and multiply it by force. 
         // This will push back the player
-        GetComponent<Rigidbody2D>().AddForce(dir*4);
+        GetComponent<Rigidbody2D>().AddForce(dir * 4);
 
         if (collision.gameObject.name == "Predator")
         {
@@ -173,12 +176,12 @@ public class Prey : MonoBehaviour, ISelectable
         // ! TODO: Fix this
         child.GetComponent<Prey>().Start();
         child.name = "Prey";
-        
+
         child.GetComponent<Prey>().Generate(generation + 1);
 
         // child.GetComponent<Prey>().Generation = generation;
         // child.GetComponent<Prey>().Speed = 2;
-        child.GetComponent<Prey>().Brain = parent.Copy(new NeuralNetwork(new[]{24, 5, 3}));
+        child.GetComponent<Prey>().Brain = parent.Copy(new NeuralNetwork(new[] { 24, 5, 3 }));
         child.GetComponent<Prey>().Brain.Mutate(20, 0.5f);
         child.GetComponent<Prey>().Brain.Fitness = 0;
 

@@ -4,20 +4,20 @@ using System.IO;
 
 public class NeuralNetwork
 {
-    private int[] Layers;           // array with the number of Neurons in in each layer, i.e. [5,4,3]
-    private float[][] Neurons;      // array with the Neurons in each layer, i.e. [[0.1, 0.2, 0.3, 0.4, 0.5], [0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3]]
-    private float[][] Biases;       // array with the Biases in each layer, same number of Neurons as in the layer
-    private float[][][] Weights;    // array with the outgoing Weights between each layer , i.e. [[[layer1], [layer1], [layer1], [layer1], [layer1]], [[layer2], [layer2], [layer2], [layer2]], [[layer3], [layer3], [layer3]]
-    private int[] Activations;
+    private int[] _layers;           // array with the number of _neurons in in each layer, i.e. [5,4,3]
+    private float[][] _neurons;      // array with the _neurons in each layer, i.e. [[0.1, 0.2, 0.3, 0.4, 0.5], [0.1, 0.2, 0.3, 0.4], [0.1, 0.2, 0.3]]
+    private float[][] _biases;       // array with the _biases in each layer, same number of _neurons as in the layer
+    private float[][][] _weights;    // array with the outgoing _weights between each layer , i.e. [[[layer1], [layer1], [layer1], [layer1], [layer1]], [[layer2], [layer2], [layer2], [layer2]], [[layer3], [layer3], [layer3]]
+    private int[] _activations;
     public double Fitness = 0;
 
-    public NeuralNetwork(int[] Layers)
+    public NeuralNetwork(int[] _layers)
     {
-        this.Layers = new int[Layers.Length];
+        this._layers = new int[_layers.Length];
 
-        for (int i = 0; i < Layers.Length; i++)
+        for (int i = 0; i < _layers.Length; i++)
         {
-            this.Layers[i] = Layers[i];
+            this._layers[i] = _layers[i];
         }
 
         InitNeurons();
@@ -26,18 +26,18 @@ public class NeuralNetwork
     }
 
     /*
-    creates a new array with the same number of Neurons as in the Layers array, to which it will be assigned a value later
+    creates a new array with the same number of _neurons as in the _layers array, to which it will be assigned a value later
     */
     private void InitNeurons()
     {
         List<float[]> NeuronsList = new List<float[]>();
 
-        for (int i = 0; i < Layers.Length; i++)
+        for (int i = 0; i < _layers.Length; i++)
         {
-            NeuronsList.Add(new float[Layers[i]]);
+            NeuronsList.Add(new float[_layers[i]]);
         }
 
-        Neurons = NeuronsList.ToArray();
+        _neurons = NeuronsList.ToArray();
     }
 
     /*
@@ -47,11 +47,11 @@ public class NeuralNetwork
     {
         List<float[]> biasList = new List<float[]>();
 
-        for (int i = 0; i < Layers.Length; i++)
+        for (int i = 0; i < _layers.Length; i++)
         {
-            float[] bias = new float[Layers[i]];
+            float[] bias = new float[_layers[i]];
 
-            for (int j = 0; j < Layers[i]; j++)
+            for (int j = 0; j < _layers[i]; j++)
             {
                 bias[j] = UnityEngine.Random.Range(-0.5f, 0.5f);
             }
@@ -59,7 +59,7 @@ public class NeuralNetwork
             biasList.Add(bias);
         }
 
-        Biases = biasList.ToArray();
+        _biases = biasList.ToArray();
     }
 
     /*
@@ -69,12 +69,12 @@ public class NeuralNetwork
     {
         List<float[][]> WeightsList = new List<float[][]>();
 
-        for (int i = 1; i < Layers.Length; i++)
+        for (int i = 1; i < _layers.Length; i++)
         {
             List<float[]> layerWeightsList = new List<float[]>();
-            int NeuronsInPreviousLayer = Layers[i - 1];
+            int NeuronsInPreviousLayer = _layers[i - 1];
 
-            for (int j = 0; j < Neurons[i].Length; j++)
+            for (int j = 0; j < _neurons[i].Length; j++)
             {
                 float[] neuronWeights = new float[NeuronsInPreviousLayer];
 
@@ -89,7 +89,7 @@ public class NeuralNetwork
             WeightsList.Add(layerWeightsList.ToArray());
         }
 
-        Weights = WeightsList.ToArray();
+        _weights = WeightsList.ToArray();
     }
 
     /*
@@ -101,33 +101,33 @@ public class NeuralNetwork
     }
 
     /*
-    performs the weighted sum of the inputs and the Biases, and then applies the activation function to the result of each neuron in the network
+    performs the weighted sum of the inputs and the _biases, and then applies the activation function to the result of each neuron in the network
     returns the output layer of the network
     */
     public float[] FeedForward(float[] inputs)
     {
         for (int i = 0; i < inputs.Length; i++)
         {
-            Neurons[0][i] = inputs[i];
+            _neurons[0][i] = inputs[i];
         }
 
-        for (int i = 1; i < Layers.Length; i++)
+        for (int i = 1; i < _layers.Length; i++)
         {
             int layer = i - 1;
 
-            for (int j = 0; j < Neurons[i].Length; j++)
+            for (int j = 0; j < _neurons[i].Length; j++)
             {
                 float value = 0f;
 
-                for (int k = 0; k < Neurons[i - 1].Length; k++)
+                for (int k = 0; k < _neurons[i - 1].Length; k++)
                 {
-                    value += Weights[i - 1][j][k] * Neurons[i - 1][k];
+                    value += _weights[i - 1][j][k] * _neurons[i - 1][k];
                 }
 
-                Neurons[i][j] = Activate(value + Biases[i][j]);
+                _neurons[i][j] = Activate(value + _biases[i][j]);
             }
         }
-        return Neurons[Neurons.Length - 1];
+        return _neurons[_neurons.Length - 1];
     }
 
     /* 
@@ -135,21 +135,21 @@ public class NeuralNetwork
      */
     public void Mutate(int chance, float val)
     {
-        for (int i = 0; i < Biases.Length; i++)
+        for (int i = 0; i < _biases.Length; i++)
         {
-            for (int j = 0; j < Biases[i].Length; j++)
+            for (int j = 0; j < _biases[i].Length; j++)
             {
-                Biases[i][j] = (UnityEngine.Random.Range(0f, chance) <= 5) ? Biases[i][j] += UnityEngine.Random.Range(-val, val) : Biases[i][j];
+                _biases[i][j] = (UnityEngine.Random.Range(0f, chance) <= 5) ? _biases[i][j] += UnityEngine.Random.Range(-val, val) : _biases[i][j];
             }
         }
 
-        for (int i = 0; i < Weights.Length; i++)
+        for (int i = 0; i < _weights.Length; i++)
         {
-            for (int j = 0; j < Weights[i].Length; j++)
+            for (int j = 0; j < _weights[i].Length; j++)
             {
-                for (int k = 0; k < Weights[i][j].Length; k++)
+                for (int k = 0; k < _weights[i][j].Length; k++)
                 {
-                    Weights[i][j][k] = (UnityEngine.Random.Range(0f, chance) <= 5) ? Weights[i][j][k] += UnityEngine.Random.Range(-val, val) : Weights[i][j][k];
+                    _weights[i][j][k] = (UnityEngine.Random.Range(0f, chance) <= 5) ? _weights[i][j][k] += UnityEngine.Random.Range(-val, val) : _weights[i][j][k];
 
                 }
             }
@@ -174,20 +174,20 @@ public class NeuralNetwork
     */
     public NeuralNetwork Copy(NeuralNetwork nn)
     {
-        for (int i = 0; i < Biases.Length; i++)
+        for (int i = 0; i < _biases.Length; i++)
         {
-            for (int j = 0; j < Biases[i].Length; j++)
+            for (int j = 0; j < _biases[i].Length; j++)
             {
-                nn.Biases[i][j] = Biases[i][j];
+                nn._biases[i][j] = _biases[i][j];
             }
         }
-        for (int i = 0; i < Weights.Length; i++)
+        for (int i = 0; i < _weights.Length; i++)
         {
-            for (int j = 0; j < Weights[i].Length; j++)
+            for (int j = 0; j < _weights[i].Length; j++)
             {
-                for (int k = 0; k < Weights[i][j].Length; k++)
+                for (int k = 0; k < _weights[i][j].Length; k++)
                 {
-                    nn.Weights[i][j][k] = Weights[i][j][k];
+                    nn._weights[i][j][k] = _weights[i][j][k];
                 }
             }
         }
@@ -195,7 +195,7 @@ public class NeuralNetwork
     }
 
     /*
-    function used to load the Weights and Biases of the network from a file, so that it can be used for the next generations
+    function used to load the _weights and _biases of the network from a file, so that it can be used for the next generations
     */
     public void Load(string path)
     {
@@ -213,22 +213,22 @@ public class NeuralNetwork
 
         if (new FileInfo(path).Length > 0)
         {
-            for (int i = 0; i < Biases.Length; i++)
+            for (int i = 0; i < _biases.Length; i++)
             {
-                for (int j = 0; j < Biases[i].Length; j++)
+                for (int j = 0; j < _biases[i].Length; j++)
                 {
-                    Biases[i][j] = float.Parse(ListLines[index]);
+                    _biases[i][j] = float.Parse(ListLines[index]);
                     index++;
                 }
             }
 
-            for (int i = 0; i < Weights.Length; i++)
+            for (int i = 0; i < _weights.Length; i++)
             {
-                for (int j = 0; j < Weights[i].Length; j++)
+                for (int j = 0; j < _weights[i].Length; j++)
                 {
-                    for (int k = 0; k < Weights[i][j].Length; k++)
+                    for (int k = 0; k < _weights[i][j].Length; k++)
                     {
-                        Weights[i][j][k] = float.Parse(ListLines[index]);
+                        _weights[i][j][k] = float.Parse(ListLines[index]);
                         index++;
                     }
                 }
@@ -237,28 +237,28 @@ public class NeuralNetwork
     }
 
     /*
-    function used to save the Weights and Biases of the network to a file, so that it can be used for the next generations
+    function used to save the _weights and _biases of the network to a file, so that it can be used for the next generations
     */
     public void Save(string path)
     {
         File.Create(path).Close();
         StreamWriter writer = new StreamWriter(path, true);
 
-        for (int i = 0; i < Biases.Length; i++)
+        for (int i = 0; i < _biases.Length; i++)
         {
-            for (int j = 0; j < Biases[i].Length; j++)
+            for (int j = 0; j < _biases[i].Length; j++)
             {
-                writer.WriteLine(Biases[i][j]);
+                writer.WriteLine(_biases[i][j]);
             }
         }
 
-        for (int i = 0; i < Weights.Length; i++)
+        for (int i = 0; i < _weights.Length; i++)
         {
-            for (int j = 0; j < Weights[i].Length; j++)
+            for (int j = 0; j < _weights[i].Length; j++)
             {
-                for (int k = 0; k < Weights[i][j].Length; k++)
+                for (int k = 0; k < _weights[i][j].Length; k++)
                 {
-                    writer.WriteLine(Weights[i][j][k]);
+                    writer.WriteLine(_weights[i][j][k]);
                 }
             }
         }

@@ -6,32 +6,32 @@ public class Raycast : MonoBehaviour
 {
     //[SerializeField] LayerMask layerMask;
     //private GameObject parent;
-    private int numberOfRays;
-    private Vector3[] rays;
-    private float[] angles;
-    private int fov;
-    private int viewRange;
+    private int _numberOfRays;
+    private Vector3[] _rays;
+    private float[] _angles;
+    private int _fov;
+    private int _viewRange;
 
-    public void Generate(int numberOfRays, int fov, int viewRange)
+    public void Generate(int _numberOfRays, int _fov, int _viewRange)
     {
-        this.numberOfRays = numberOfRays;
-        this.fov = fov;
-        this.viewRange = viewRange;
-        this.rays = new Vector3[numberOfRays];
-        this.angles = new float[numberOfRays];
+        this._numberOfRays = _numberOfRays;
+        this._fov = _fov;
+        this._viewRange = _viewRange;
+        this._rays = new Vector3[_numberOfRays];
+        this._angles = new float[_numberOfRays];
         Physics2D.queriesStartInColliders = false;
 
-        float initAngle = 90f - (float)fov / 2f;
-        float step = (float)fov / (numberOfRays - 1);
+        float initAngle = 90f - (float)_fov / 2f;
+        float step = (float)_fov / (_numberOfRays - 1);
         //print("Init angle " + initAngle + " step " + step.ToString("n2"));
-        for (int i = 0; i < numberOfRays; i++)
+        for (int i = 0; i < _numberOfRays; i++)
         {
-            float angle = i * step + initAngle; // - fov/2; //+ (fov/numberOfRays)/2;
+            float angle = i * step + initAngle; // - _fov/2; //+ (_fov/_numberOfRays)/2;
             float angleInRadians = angle * Mathf.Deg2Rad;
             //print("i " + i +  " angle " + angle );
-            rays[i] = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
-            angles[i] = angle;
-            //Debug.DrawRay(transform.position, rays[i] * viewRange, Color.white, 30f);
+            _rays[i] = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
+            _angles[i] = angle;
+            //Debug.DrawRay(transform.position, _rays[i] * _viewRange, Color.white, 30f);
         }
     }
 
@@ -39,15 +39,15 @@ public class Raycast : MonoBehaviour
     {
         var pos = transform.position;
 
-        for (int i = 0; i < numberOfRays; i++)
+        for (int i = 0; i < _numberOfRays; i++)
         {
-            rays[i] = Quaternion.AngleAxis(ang, transform.forward) * rays[i];
-            angles[i] += ang;
+            _rays[i] = Quaternion.AngleAxis(ang, transform.forward) * _rays[i];
+            _angles[i] += ang;
 
-            RaycastHit2D hit = Physics2D.Raycast(pos, rays[i], viewRange);
+            RaycastHit2D hit = Physics2D.Raycast(pos, _rays[i], _viewRange);
 
             Color color = Color.green;
-            float rayLength = viewRange;
+            float rayLength = _viewRange;
             if (hit.collider != null)
             {
                 // print(
@@ -60,7 +60,7 @@ public class Raycast : MonoBehaviour
                 //print("I hit nothing");
                 color = Color.red;
             }
-            Debug.DrawRay(pos, rays[i].normalized * rayLength, color);
+            Debug.DrawRay(pos, _rays[i].normalized * rayLength, color);
         }
     }
 }
