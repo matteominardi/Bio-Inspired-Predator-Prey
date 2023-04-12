@@ -44,6 +44,7 @@ public class Predator : MonoBehaviour, ISelectable
         Generation = generation;
         name = "Predator";
 
+        GetComponent<SpriteRenderer>().color = Color.red;
         GetComponent<Raycast>().Generate(24, 90, 60);
 
     }
@@ -51,14 +52,37 @@ public class Predator : MonoBehaviour, ISelectable
     // Update is called once per frame
     void Update()
     {
-        if (Alive) {
-            Fitness += 1.0 * Time.deltaTime;
-            GetComponent<Raycast>().UpdateRays(0);
+        if (!Alive) 
+            return;
+        
+        Fitness += 1.0 * Time.deltaTime;
+        GetComponent<Raycast>().UpdateRays(0);
+
+        if (Energy <= 0)
+        {
+            print("I am dead");
+            Alive = false;
+            Fitness = -1;
+            Destroy(gameObject);
+        }
+        else
+        {
+            Energy -= 1.0f * Time.deltaTime;
         }
     }
 
     void OnCollisionEnter2D(Collision2D collision)
     {
+        if (collision.gameObject.name == "Prey" || collision.gameObject.name == "Predator") {
+            // Calculate Angle Between the collision point and the player
+            Vector2 dir = collision.contacts[0].point - new Vector2(transform.position.x, transform.position.y);
+            // We then get the opposite (-Vector3) and normalize it
+            dir = -dir.normalized;
+            // And finally we add force in the direction of dir and multiply it by force. 
+            // This will push back the player
+            GetComponent<Rigidbody2D>().AddForce(dir * 16);
+        }
+        
         if (collision.gameObject.name == "Predator")
         {
             print("I hit a Predator");

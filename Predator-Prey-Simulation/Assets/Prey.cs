@@ -65,6 +65,7 @@ public class Prey : MonoBehaviour, ISelectable
         _age = Time.time;
         name = "Prey";
 
+        GetComponent<SpriteRenderer>().color = Color.green;
         GetComponent<Raycast>().Generate(24, 300, 30);
     }
 
@@ -151,7 +152,7 @@ public class Prey : MonoBehaviour, ISelectable
             dir = -dir.normalized;
             // And finally we add force in the direction of dir and multiply it by force. 
             // This will push back the player
-            GetComponent<Rigidbody2D>().AddForce(dir * 4);
+            GetComponent<Rigidbody2D>().AddForce(dir * 16);
         }
         
 

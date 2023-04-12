@@ -12,6 +12,8 @@ public class Raycast : MonoBehaviour
     private int _fov;
     private int _viewRange;
 
+    [SerializeField] private LayerMask layerMask;
+
     public void Generate(int _numberOfRays, int _fov, int _viewRange)
     {
         this._numberOfRays = _numberOfRays;
@@ -20,6 +22,7 @@ public class Raycast : MonoBehaviour
         this._rays = new Vector3[_numberOfRays];
         this._angles = new float[_numberOfRays];
         Physics2D.queriesStartInColliders = false;
+        layerMask = ~(1 << 6);
 
         float initAngle = 90f - (float)_fov / 2f;
         float step = (float)_fov / (_numberOfRays - 1);
@@ -44,7 +47,7 @@ public class Raycast : MonoBehaviour
             _rays[i] = Quaternion.AngleAxis(ang, transform.forward) * _rays[i];
             _angles[i] += ang;
 
-            RaycastHit2D hit = Physics2D.Raycast(pos, _rays[i], _viewRange);
+            RaycastHit2D hit = Physics2D.Raycast(pos, _rays[i], _viewRange, layerMask);
 
             Color color = Color.green;
             float rayLength = _viewRange;
@@ -58,7 +61,7 @@ public class Raycast : MonoBehaviour
             else
             {
                 //print("I hit nothing");
-                color = Color.red;
+                color = Color.gray;
             }
             Debug.DrawRay(pos, _rays[i].normalized * rayLength, color);
         }
