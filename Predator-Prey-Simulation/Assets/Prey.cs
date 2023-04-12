@@ -143,6 +143,10 @@ public class Prey : MonoBehaviour, ISelectable
         }
     }
 
+    void LateUpdate() {
+        
+    }
+
     void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.name == "Prey" || collision.gameObject.name == "Predator") {

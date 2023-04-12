@@ -14,6 +14,8 @@ public class Predator : MonoBehaviour, ISelectable
     public double Speed { get; private set; }
     public int Generation { get; private set; }
     public float ReproductionFactor { get; private set; }
+    private float[] _inputs;
+    private float[] _outputs;
 
 
     void Start()
@@ -44,6 +46,7 @@ public class Predator : MonoBehaviour, ISelectable
         Speed = 3;
         Generation = generation;
         ReproductionFactor = 0f;
+        _inputs = new float[24];
         name = "Predator";
 
         GetComponent<SpriteRenderer>().color = Color.red;
@@ -66,7 +69,7 @@ public class Predator : MonoBehaviour, ISelectable
 
         Fitness += 1.0 * Time.deltaTime;
         ReproductionFactor = Mathf.Max(ReproductionFactor - 1.0f * Time.deltaTime, 0);
-        GetComponent<Raycast>().UpdateRays(0);
+        //GetComponent<Raycast>().UpdateRays(0);
 
         if (Energy <= 0)
         {
@@ -79,6 +82,27 @@ public class Predator : MonoBehaviour, ISelectable
         {
             Energy -= 1.0f * Time.deltaTime;
         }
+    }
+
+    void LateUpdate() {
+        for (int i = 0; i < _inputs.Length; i++)
+        {
+            _inputs[i] = GetComponent<Raycast>().Distances[i];
+        }
+        _outputs = brain.FeedForward(_inputs);
+
+        float angularVelocity = _outputs[0];// * 2 - 1;
+        float linearVelocity = _outputs[1];// * 2 - 1;
+
+        transform.Translate(Vector2.up * Time.deltaTime * 2 * (int)Speed * linearVelocity);
+        transform.Rotate(new Vector3(0, 0, angularVelocity) * Time.deltaTime * 90 * 2);
+
+        print("Angular Velocity: " + angularVelocity);
+        print("Linear Velocity: " + linearVelocity);
+
+        GetComponent<Raycast>().UpdateRays(Time.deltaTime * 90 * 2 * (angularVelocity));
+
+
     }
 
     void OnCollisionEnter2D(Collision2D collision)

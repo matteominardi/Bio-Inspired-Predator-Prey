@@ -14,6 +14,18 @@ public class SceneInitializer : MonoBehaviour
 
         Predator firstPredator = Instantiate<Predator>(predatorPrefab, new Vector3(4, 0, 0), Quaternion.identity);
         firstPredator.Generate(1);
+
+        for (int i = 0; i < 10; i++)
+        {
+            Prey prey = Instantiate<Prey>(preyPrefab, new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), 0), Quaternion.identity);
+            prey.Generate(1);
+        }
+
+        for (int i = 0; i < 10; i++)
+        {
+            Predator predator = Instantiate<Predator>(predatorPrefab, new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), 0), Quaternion.identity);
+            predator.Generate(1);
+        }
     }
 
     // Update is called once per frame

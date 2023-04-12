@@ -11,6 +11,7 @@ public class Raycast : MonoBehaviour
     private float[] _angles;
     private int _fov;
     private int _viewRange;
+    public float[] Distances;
 
     [SerializeField] private LayerMask layerMask;
 
@@ -21,6 +22,7 @@ public class Raycast : MonoBehaviour
         this._viewRange = _viewRange;
         this._rays = new Vector3[_numberOfRays];
         this._angles = new float[_numberOfRays];
+        this.Distances = new float[_numberOfRays];
         Physics2D.queriesStartInColliders = false;
         layerMask = ~(1 << 6);
 
@@ -57,12 +59,14 @@ public class Raycast : MonoBehaviour
                 //     "I can see a " + hit.collider.gameObject.name + " at " + hit.distance + " units"
                 // );
                 rayLength = hit.distance;
+                
             }
             else
             {
                 //print("I hit nothing");
                 color = Color.gray;
             }
+            Distances[i] = rayLength < _viewRange ? 1/rayLength : 0;
             Debug.DrawRay(pos, _rays[i].normalized * rayLength, color);
         }
     }
