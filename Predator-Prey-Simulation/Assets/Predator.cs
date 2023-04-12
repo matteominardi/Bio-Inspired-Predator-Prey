@@ -13,6 +13,7 @@ public class Predator : MonoBehaviour, ISelectable
     public float Energy { get; private set; }
     public double Speed { get; private set; }
     public int Generation { get; private set; }
+    public float ReproductionFactor { get; private set; }
 
 
     void Start()
@@ -27,7 +28,7 @@ public class Predator : MonoBehaviour, ISelectable
         // GetComponent<Raycast>().Generate(24, 90, 60);
     }
 
-    public void Generate(int generation, NeuralNetwork parent = null)
+    public void Generate(int generation, NeuralNetwork parent = null, float rotationAngle = 0)
     {
         if (parent == null)
             brain = new NeuralNetwork(new[] { 24, 5, 3 });
@@ -42,10 +43,11 @@ public class Predator : MonoBehaviour, ISelectable
         Energy = 100;
         Speed = 3;
         Generation = generation;
+        ReproductionFactor = 0f;
         name = "Predator";
 
         GetComponent<SpriteRenderer>().color = Color.red;
-        GetComponent<Raycast>().Generate(24, 90, 60);
+        GetComponent<Raycast>().Generate(24, 90, 60, rotationAngle);
 
     }
 
@@ -55,7 +57,15 @@ public class Predator : MonoBehaviour, ISelectable
         if (!Alive) 
             return;
         
+        if (ReproductionFactor >= 100)
+        {
+            //print("I am reproducing");
+            Reproduce(brain, Generation);
+            ReproductionFactor = 0;
+        }
+
         Fitness += 1.0 * Time.deltaTime;
+        ReproductionFactor = Mathf.Max(ReproductionFactor - 1.0f * Time.deltaTime, 0);
         GetComponent<Raycast>().UpdateRays(0);
 
         if (Energy <= 0)
@@ -82,7 +92,7 @@ public class Predator : MonoBehaviour, ISelectable
             // This will push back the player
             GetComponent<Rigidbody2D>().AddForce(dir * 16);
         }
-        
+
         if (collision.gameObject.name == "Predator")
         {
             print("I hit a Predator");
@@ -91,12 +101,13 @@ public class Predator : MonoBehaviour, ISelectable
         {
             print("I hit a Prey");
             Lifepoints -= 25;
-            Fitness += 2;
+            //Fitness += 2;
 
             if (collision.gameObject.GetComponent<Prey>().Lifepoints <= 0)
             {
-                Energy += 10;
-                Fitness += 10;
+                Energy += 30;
+                ReproductionFactor += 50f;
+                //Fitness += 10;
             }
 
             if (Lifepoints <= 0)
@@ -107,5 +118,25 @@ public class Predator : MonoBehaviour, ISelectable
                 Destroy(gameObject);
             }
         }
+    }
+
+    void Reproduce(NeuralNetwork parent, int generation)
+    {
+        Vector2 randomPosition = new Vector2(transform.position.x, transform.position.y) + Random.insideUnitCircle;
+        float randomRotationAngle = Random.Range(0.0f, 360.0f);
+        Quaternion randomRotation = Quaternion.Euler(0.0f, 0.0f, randomRotationAngle);
+        GameObject child = Instantiate(gameObject, randomPosition, randomRotation);
+
+        //child.GetComponent<Prey>().Start();
+        //child.name = "Prey";
+
+        child.GetComponent<Predator>().Generate(generation + 1, parent.Copy(new NeuralNetwork(new[] { 24, 5, 3 })), randomRotationAngle);
+
+        // child.GetComponent<Prey>().Generation = generation;
+        // child.GetComponent<Prey>().Speed = 2;
+        //child.GetComponent<Prey>().Brain = parent.Copy(new NeuralNetwork(new[] { 24, 5, 3 }));
+        // child.GetComponent<Prey>().Brain.Mutate(20, 0.5f);
+
+        // child.GetComponent<Prey>().GetComponent<Raycast>().Generate(24, 300, 30);
     }
 }

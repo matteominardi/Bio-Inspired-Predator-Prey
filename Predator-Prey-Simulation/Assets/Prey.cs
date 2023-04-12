@@ -46,7 +46,7 @@ public class Prey : MonoBehaviour, ISelectable
         // GetComponent<Raycast>().Generate(24, 300, 30);
     }
 
-    public void Generate(int generation, NeuralNetwork parent = null)
+    public void Generate(int generation, NeuralNetwork parent = null, float rotationAngle=0)
     {
         if (parent == null)
             Brain = new NeuralNetwork(new[] { 24, 5, 3 });
@@ -66,7 +66,7 @@ public class Prey : MonoBehaviour, ISelectable
         name = "Prey";
 
         GetComponent<SpriteRenderer>().color = Color.green;
-        GetComponent<Raycast>().Generate(24, 300, 30);
+        GetComponent<Raycast>().Generate(24, 300, 30, rotationAngle);
     }
 
     // Update is called once per frame
@@ -179,13 +179,16 @@ public class Prey : MonoBehaviour, ISelectable
 
     void Reproduce(NeuralNetwork parent, int generation)
     {
-        GameObject child = Instantiate(gameObject, new Vector2(transform.position.x, transform.position.y) + Random.insideUnitCircle, Quaternion.Euler(0.0f, 0.0f, Random.Range(0.0f, 360.0f)));
+        Vector2 randomPosition = new Vector2(transform.position.x, transform.position.y) + Random.insideUnitCircle;
+        float randomRotationAngle = Random.Range(0.0f, 360.0f);
+        Quaternion randomRotation = Quaternion.Euler(0.0f, 0.0f, randomRotationAngle);
+        print("Random rotation " + randomRotation);
+        GameObject child = Instantiate(gameObject, randomPosition, randomRotation);
 
-        // ! TODO: Fix this
         //child.GetComponent<Prey>().Start();
-        child.name = "Prey";
+        //child.name = "Prey";
 
-        child.GetComponent<Prey>().Generate(generation + 1, parent.Copy(new NeuralNetwork(new[] { 24, 5, 3 })));
+        child.GetComponent<Prey>().Generate(generation + 1, parent.Copy(new NeuralNetwork(new[] { 24, 5, 3 })), randomRotationAngle);
 
         // child.GetComponent<Prey>().Generation = generation;
         // child.GetComponent<Prey>().Speed = 2;

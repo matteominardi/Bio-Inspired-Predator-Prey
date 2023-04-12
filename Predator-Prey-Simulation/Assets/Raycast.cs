@@ -14,7 +14,7 @@ public class Raycast : MonoBehaviour
 
     [SerializeField] private LayerMask layerMask;
 
-    public void Generate(int _numberOfRays, int _fov, int _viewRange)
+    public void Generate(int _numberOfRays, int _fov, int _viewRange, float rotationAngle=0)
     {
         this._numberOfRays = _numberOfRays;
         this._fov = _fov;
@@ -24,7 +24,7 @@ public class Raycast : MonoBehaviour
         Physics2D.queriesStartInColliders = false;
         layerMask = ~(1 << 6);
 
-        float initAngle = 90f - (float)_fov / 2f;
+        float initAngle = (90f + rotationAngle) % 360f - (float)_fov / 2f;
         float step = (float)_fov / (_numberOfRays - 1);
         //print("Init angle " + initAngle + " step " + step.ToString("n2"));
         for (int i = 0; i < _numberOfRays; i++)
