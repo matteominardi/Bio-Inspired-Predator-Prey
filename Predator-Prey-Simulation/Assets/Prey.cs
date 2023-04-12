@@ -25,36 +25,45 @@ public class Prey : MonoBehaviour, ISelectable
     public double Speed { get; private set; }
     public int Generation { get; private set; }
 
-    private bool _energyExhausted = false;
+    private bool _energyExhausted;
 
     private float _age;
 
     // Start is called before the first frame update
-    public void Start()
+    void Start()
     {
-        print(name);
-        Brain = new NeuralNetwork(new[] { 24, 5, 3 });
-        Lifepoints = 100;
-        Fitness = 0;
-        Alive = true;
-        Energy = 100;
-        Speed = 2;
-        Generation = 1;
-        _age = Time.time;
+        // print(name);
+        // Brain = new NeuralNetwork(new[] { 24, 5, 3 });
+        // Lifepoints = 100;
+        // Fitness = 0;
+        // Alive = true;
+        // Energy = 100;
+        // Speed = 2;
+        // Generation = 1;
+        // _energyExhausted = false;
+        // _age = Time.time;
 
-        GetComponent<Raycast>().Generate(24, 300, 30);
+        // GetComponent<Raycast>().Generate(24, 300, 30);
     }
 
-    public void Generate(int generation)
+    public void Generate(int generation, NeuralNetwork parent = null)
     {
-        Brain = new NeuralNetwork(new[] { 24, 5, 3 });
+        if (parent == null)
+            Brain = new NeuralNetwork(new[] { 24, 5, 3 });
+        else 
+        {
+            Brain = parent;
+            Brain.Mutate(20, 0.5f);
+        }
         Lifepoints = 100;
         Fitness = 0;
         Alive = true;
         Energy = 100;
         Speed = 2;
         Generation = generation;
+        _energyExhausted = false;
         _age = Time.time;
+        name = "Prey";
 
         GetComponent<Raycast>().Generate(24, 300, 30);
     }
@@ -135,18 +144,21 @@ public class Prey : MonoBehaviour, ISelectable
 
     void OnCollisionEnter2D(Collision2D collision)
     {
-        // Calculate Angle Between the collision point and the player
-        Vector2 dir = collision.contacts[0].point - new Vector2(transform.position.x, transform.position.y);
-        // We then get the opposite (-Vector3) and normalize it
-        dir = -dir.normalized;
-        // And finally we add force in the direction of dir and multiply it by force. 
-        // This will push back the player
-        GetComponent<Rigidbody2D>().AddForce(dir * 4);
+        if (collision.gameObject.name == "Prey" || collision.gameObject.name == "Predator") {
+            // Calculate Angle Between the collision point and the player
+            Vector2 dir = collision.contacts[0].point - new Vector2(transform.position.x, transform.position.y);
+            // We then get the opposite (-Vector3) and normalize it
+            dir = -dir.normalized;
+            // And finally we add force in the direction of dir and multiply it by force. 
+            // This will push back the player
+            GetComponent<Rigidbody2D>().AddForce(dir * 4);
+        }
+        
 
         if (collision.gameObject.name == "Predator")
         {
             print("I hit a Predator");
-            Lifepoints -= 25;
+            Lifepoints -= 50;
 
             if (Lifepoints <= 0)
             {
@@ -159,14 +171,9 @@ public class Prey : MonoBehaviour, ISelectable
         else if (collision.gameObject.name == "Prey")
         {
             print("I hit a Prey");
-            Lifepoints += 5;
+            Lifepoints = Mathf.Min(Lifepoints + 1, 100);
             Fitness += 0.25;
         }
-    }
-
-    public void UpdateFitness()
-    {
-        Brain.Fitness = Fitness;
     }
 
     void Reproduce(NeuralNetwork parent, int generation)
@@ -174,17 +181,16 @@ public class Prey : MonoBehaviour, ISelectable
         GameObject child = Instantiate(gameObject, new Vector2(transform.position.x, transform.position.y) + Random.insideUnitCircle, Quaternion.Euler(0.0f, 0.0f, Random.Range(0.0f, 360.0f)));
 
         // ! TODO: Fix this
-        child.GetComponent<Prey>().Start();
+        //child.GetComponent<Prey>().Start();
         child.name = "Prey";
 
-        child.GetComponent<Prey>().Generate(generation + 1);
+        child.GetComponent<Prey>().Generate(generation + 1, parent.Copy(new NeuralNetwork(new[] { 24, 5, 3 })));
 
         // child.GetComponent<Prey>().Generation = generation;
         // child.GetComponent<Prey>().Speed = 2;
-        child.GetComponent<Prey>().Brain = parent.Copy(new NeuralNetwork(new[] { 24, 5, 3 }));
-        child.GetComponent<Prey>().Brain.Mutate(20, 0.5f);
-        child.GetComponent<Prey>().Brain.Fitness = 0;
+        //child.GetComponent<Prey>().Brain = parent.Copy(new NeuralNetwork(new[] { 24, 5, 3 }));
+        // child.GetComponent<Prey>().Brain.Mutate(20, 0.5f);
 
-        child.GetComponent<Prey>().GetComponent<Raycast>().Generate(24, 300, 30);
+        // child.GetComponent<Prey>().GetComponent<Raycast>().Generate(24, 300, 30);
     }
 }

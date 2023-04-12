@@ -9,7 +9,6 @@ public class NeuralNetwork
     private float[][] _biases;       // array with the _biases in each layer, same number of _neurons as in the layer
     private float[][][] _weights;    // array with the outgoing _weights between each layer , i.e. [[[layer1], [layer1], [layer1], [layer1], [layer1]], [[layer2], [layer2], [layer2], [layer2]], [[layer3], [layer3], [layer3]]
     private int[] _activations;
-    public double Fitness = 0;
 
     public NeuralNetwork(int[] _layers)
     {
@@ -156,18 +155,6 @@ public class NeuralNetwork
         }
     }
 
-    /*
-    function used to understand which network between two candidates is better, based on their Fitness 
-    */
-    public int CompareTo(NeuralNetwork other)
-    {
-        if (other == null || Fitness > other.Fitness)
-            return 1;
-        else if (Fitness < other.Fitness)
-            return -1;
-        else
-            return 0;
-    }
 
     /*
     takes a NN in input and edits it in order to make it a copy of the current one

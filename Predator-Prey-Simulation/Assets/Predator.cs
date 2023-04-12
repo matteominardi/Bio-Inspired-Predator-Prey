@@ -17,14 +17,35 @@ public class Predator : MonoBehaviour, ISelectable
 
     void Start()
     {
-        print("Predator");
+        // print("Predator");
+        // Lifepoints = 100;
+        // Fitness = 0;
+        // Alive = true;
+        // Energy = 100;
+        // Speed = 3;
+
+        // GetComponent<Raycast>().Generate(24, 90, 60);
+    }
+
+    public void Generate(int generation, NeuralNetwork parent = null)
+    {
+        if (parent == null)
+            brain = new NeuralNetwork(new[] { 24, 5, 3 });
+        else
+        {
+            brain = parent;
+            brain.Mutate(20, 0.5f);
+        }
         Lifepoints = 100;
         Fitness = 0;
         Alive = true;
         Energy = 100;
         Speed = 3;
+        Generation = generation;
+        name = "Predator";
 
         GetComponent<Raycast>().Generate(24, 90, 60);
+
     }
 
     // Update is called once per frame
@@ -45,7 +66,7 @@ public class Predator : MonoBehaviour, ISelectable
         else if (collision.gameObject.name == "Prey")
         {
             print("I hit a Prey");
-            Lifepoints -= 10;
+            Lifepoints -= 25;
             Fitness += 2;
 
             if (collision.gameObject.GetComponent<Prey>().Lifepoints <= 0)
@@ -62,10 +83,5 @@ public class Predator : MonoBehaviour, ISelectable
                 Destroy(gameObject);
             }
         }
-    }
-
-    public void UpdateFitness()
-    {
-        brain.Fitness = Fitness;
     }
 }
