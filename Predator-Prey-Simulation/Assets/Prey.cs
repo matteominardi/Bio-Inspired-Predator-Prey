@@ -46,7 +46,7 @@ public class Prey : MonoBehaviour, ISelectable
         // GetComponent<Raycast>().Generate(24, 300, 30);
     }
 
-    public void Generate(int generation, NeuralNetwork parent = null, float rotationAngle=0)
+    public void Generate(int generation, NeuralNetwork parent = null)//, float rotationAngle=0)
     {
         if (parent == null)
             Brain = new NeuralNetwork(new[] { 24, 5, 3 });
@@ -66,12 +66,13 @@ public class Prey : MonoBehaviour, ISelectable
         name = "Prey";
 
         GetComponent<SpriteRenderer>().color = Color.green;
-        GetComponent<Raycast>().Generate(24, 300, 30, rotationAngle);
+        GetComponent<Raycast>().Generate(24, 90, 30, this);//, rotationAngle);
     }
 
     // Update is called once per frame
     void Update()
     {
+        //GetComponent<Raycast>().UpdateRays();
         if (!Alive)
             return;
 
@@ -85,7 +86,8 @@ public class Prey : MonoBehaviour, ISelectable
 
         if (Energy <= 0f)
         {
-            GetComponent<Raycast>().UpdateRays(0);
+            //GetComponent<Raycast>().UpdateRays(0);
+            GetComponent<Raycast>().UpdateRays();
             Energy += 5f * Time.deltaTime;
             _energyExhausted = true;
             GetComponent<SpriteRenderer>().color = new Color(0, 0.3f, 0);
@@ -109,7 +111,8 @@ public class Prey : MonoBehaviour, ISelectable
 
             //rotate
             transform.Rotate(new Vector3(0, 0, -1) * Time.deltaTime * 90 * 2);
-            GetComponent<Raycast>().UpdateRays(-Time.deltaTime * 90 * 2);
+            //GetComponent<Raycast>().UpdateRays(-Time.deltaTime * 90 * 2 * 0);
+            GetComponent<Raycast>().UpdateRays();
         }
         if (Input.GetKey(KeyCode.LeftArrow))
         {
@@ -118,19 +121,22 @@ public class Prey : MonoBehaviour, ISelectable
 
             //rotate
             transform.Rotate(new Vector3(0, 0, 1) * Time.deltaTime * 90 * 2);
-            GetComponent<Raycast>().UpdateRays(Time.deltaTime * 90 * 2);
+            //GetComponent<Raycast>().UpdateRays(Time.deltaTime * 90 * 2);
+            GetComponent<Raycast>().UpdateRays();
         }
         if (Input.GetKey(KeyCode.UpArrow))
         {
             // move up
             transform.Translate(Vector2.up * Time.deltaTime * 2 * (int)Speed);
-            GetComponent<Raycast>().UpdateRays(0);
+            //GetComponent<Raycast>().UpdateRays(0);
+            GetComponent<Raycast>().UpdateRays();
         }
         if (Input.GetKey(KeyCode.DownArrow))
         {
             // move down
             transform.Translate(Vector2.down * Time.deltaTime * 2 * (int)Speed);
-            GetComponent<Raycast>().UpdateRays(0);
+            //GetComponent<Raycast>().UpdateRays(0);
+            GetComponent<Raycast>().UpdateRays();
         }
         if (!(Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.DownArrow)))
         {
@@ -186,13 +192,13 @@ public class Prey : MonoBehaviour, ISelectable
         Vector2 randomPosition = new Vector2(transform.position.x, transform.position.y) + Random.insideUnitCircle;
         float randomRotationAngle = Random.Range(0.0f, 360.0f);
         Quaternion randomRotation = Quaternion.Euler(0.0f, 0.0f, randomRotationAngle);
-        print("Random rotation " + randomRotation);
+        //print("Random rotation " + randomRotationAngle);
         GameObject child = Instantiate(gameObject, randomPosition, randomRotation);
 
         //child.GetComponent<Prey>().Start();
         //child.name = "Prey";
 
-        child.GetComponent<Prey>().Generate(generation + 1, parent.Copy(new NeuralNetwork(new[] { 24, 5, 3 })), randomRotationAngle);
+        child.GetComponent<Prey>().Generate(generation + 1, parent.Copy(new NeuralNetwork(new[] { 24, 5, 3 })));//, randomRotationAngle);
 
         // child.GetComponent<Prey>().Generation = generation;
         // child.GetComponent<Prey>().Speed = 2;

@@ -15,7 +15,13 @@ public class Raycast : MonoBehaviour
 
     [SerializeField] private LayerMask layerMask;
 
-    public void Generate(int _numberOfRays, int _fov, int _viewRange, float rotationAngle=0)
+    public void Generate(
+        int _numberOfRays,
+        int _fov,
+        int _viewRange,
+        MonoBehaviour parentObj,
+        float rotationAngle = 0
+    )
     {
         this._numberOfRays = _numberOfRays;
         this._fov = _fov;
@@ -23,33 +29,73 @@ public class Raycast : MonoBehaviour
         this._rays = new Vector3[_numberOfRays];
         this._angles = new float[_numberOfRays];
         this.Distances = new float[_numberOfRays];
+        this.transform.parent = parentObj.transform;
         Physics2D.queriesStartInColliders = false;
         layerMask = ~(1 << 6);
 
-        float initAngle = (90f + rotationAngle) % 360f - (float)_fov / 2f;
-        float step = (float)_fov / (_numberOfRays - 1);
-        //print("Init angle " + initAngle + " step " + step.ToString("n2"));
-        for (int i = 0; i < _numberOfRays; i++)
-        {
-            float angle = i * step + initAngle; // - _fov/2; //+ (_fov/_numberOfRays)/2;
-            float angleInRadians = angle * Mathf.Deg2Rad;
-            //print("i " + i +  " angle " + angle );
-            _rays[i] = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
-            _angles[i] = angle;
-            //Debug.DrawRay(transform.position, _rays[i] * _viewRange, Color.white, 30f);
-        }
+        // float initAngle = (90f + rotationAngle) % 360f - (float)_fov / 2f;
+        // float step = (float)_fov / (_numberOfRays - 1);
+        // //print("Init angle " + initAngle + " step " + step.ToString("n2"));
+        // for (int i = 0; i < _numberOfRays; i++)
+        // {
+        //     float angle = i * step + initAngle; // - _fov/2; //+ (_fov/_numberOfRays)/2;
+        //     float angleInRadians = angle * Mathf.Deg2Rad;
+        //     //print("i " + i +  " angle " + angle );
+        //     _rays[i] = new Vector2(Mathf.Cos(angleInRadians), Mathf.Sin(angleInRadians));
+        //     _angles[i] = angle;
+        //     //Debug.DrawRay(transform.position, _rays[i] * _viewRange, Color.white, 30f);
+        // }
     }
 
-    public void UpdateRays(float ang)
+    // public void UpdateRays(float ang)
+    // {
+    //     var pos = transform.position;
+
+    //     for (int i = 0; i < _numberOfRays; i++)
+    //     {
+    //         _rays[i] = Quaternion.AngleAxis(ang, transform.forward) * _rays[i];
+    //         _angles[i] += ang;
+
+    //         RaycastHit2D hit = Physics2D.Raycast(pos, _rays[i], _viewRange, layerMask);
+
+    //         Color color = Color.green;
+    //         float rayLength = _viewRange;
+    //         if (hit.collider != null)
+    //         {
+    //             // print(
+    //             //     "I can see a " + hit.collider.gameObject.name + " at " + hit.distance + " units"
+    //             // );
+    //             rayLength = hit.distance;
+    //         }
+    //         else
+    //         {
+    //             //print("I hit nothing");
+    //             color = Color.gray;
+    //         }
+    //         Distances[i] = rayLength < _viewRange ? 1 / rayLength : 0;
+    //         Debug.DrawRay(pos, _rays[i].normalized * rayLength, color);
+    //     }
+    // }
+
+    public void UpdateRays()
     {
         var pos = transform.position;
 
         for (int i = 0; i < _numberOfRays; i++)
         {
-            _rays[i] = Quaternion.AngleAxis(ang, transform.forward) * _rays[i];
-            _angles[i] += ang;
+            //_rays[i] = Quaternion.AngleAxis(ang, transform.forward) * _rays[i];
+            //_angles[i] += ang;
 
-            RaycastHit2D hit = Physics2D.Raycast(pos, _rays[i], _viewRange, layerMask);
+            float step = (float)_fov / (float)(_numberOfRays - 1);    
+            // float angle = (i * step + (_fov / 2) + (360-_fov))%360;
+            // //float angle = i * step + (- _fov / 2)%360;
+            float cosineAngle = Mathf.Acos(Vector3.Dot(transform.up, Vector3.up) / (transform.up.magnitude * Vector3.up.magnitude));
+            float angle = (float)((float)i * step  + cosineAngle) % 360.0f - (float)_fov/2.0f;
+            Vector3 dir = Quaternion.AngleAxis(angle, Vector3.forward) * transform.up;
+            //if (i == 0)
+            //print("i " + i + " angle " + angle.ToString("n2") + " dir " + dir + " transform.up " + transform.up + " angle of rotation " + Vector3.Angle(Vector3.up, transform.up));
+
+            RaycastHit2D hit = Physics2D.Raycast(pos, dir, _viewRange, layerMask);
 
             Color color = Color.green;
             float rayLength = _viewRange;
@@ -59,15 +105,14 @@ public class Raycast : MonoBehaviour
                 //     "I can see a " + hit.collider.gameObject.name + " at " + hit.distance + " units"
                 // );
                 rayLength = hit.distance;
-                
             }
             else
             {
                 //print("I hit nothing");
                 color = Color.gray;
             }
-            Distances[i] = rayLength < _viewRange ? 1/rayLength : 0;
-            Debug.DrawRay(pos, _rays[i].normalized * rayLength, color);
+            Distances[i] = rayLength < _viewRange ? 1 / rayLength : 0;
+            Debug.DrawRay(pos, dir.normalized * rayLength, color);
         }
     }
 }

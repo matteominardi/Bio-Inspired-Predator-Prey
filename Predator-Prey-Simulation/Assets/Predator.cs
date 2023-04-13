@@ -30,7 +30,7 @@ public class Predator : MonoBehaviour, ISelectable
         // GetComponent<Raycast>().Generate(24, 90, 60);
     }
 
-    public void Generate(int generation, NeuralNetwork parent = null, float rotationAngle = 0)
+    public void Generate(int generation, NeuralNetwork parent = null)//, float rotationAngle = 0)
     {
         if (parent == null)
             brain = new NeuralNetwork(new[] { 24, 5, 3 });
@@ -50,7 +50,7 @@ public class Predator : MonoBehaviour, ISelectable
         name = "Predator";
 
         GetComponent<SpriteRenderer>().color = Color.red;
-        GetComponent<Raycast>().Generate(24, 90, 60, rotationAngle);
+        GetComponent<Raycast>().Generate(24, 90, 60, this);//, rotationAngle);
 
     }
 
@@ -100,7 +100,8 @@ public class Predator : MonoBehaviour, ISelectable
         print("Angular Velocity: " + angularVelocity);
         print("Linear Velocity: " + linearVelocity);
 
-        GetComponent<Raycast>().UpdateRays(Time.deltaTime * 90 * 2 * (angularVelocity));
+        //GetComponent<Raycast>().UpdateRays(Time.deltaTime * 90 * 2 * (angularVelocity));
+        GetComponent<Raycast>().UpdateRays();
 
 
     }
@@ -130,7 +131,8 @@ public class Predator : MonoBehaviour, ISelectable
             if (collision.gameObject.GetComponent<Prey>().Lifepoints <= 0)
             {
                 Energy += 30;
-                ReproductionFactor += 50f;
+                Lifepoints = Mathf.Min(Lifepoints + 50, 100);
+                ReproductionFactor += 100f;
                 //Fitness += 10;
             }
 
@@ -148,13 +150,14 @@ public class Predator : MonoBehaviour, ISelectable
     {
         Vector2 randomPosition = new Vector2(transform.position.x, transform.position.y) + Random.insideUnitCircle;
         float randomRotationAngle = Random.Range(0.0f, 360.0f);
+        print("Predator Random rotation " + randomRotationAngle);
         Quaternion randomRotation = Quaternion.Euler(0.0f, 0.0f, randomRotationAngle);
         GameObject child = Instantiate(gameObject, randomPosition, randomRotation);
 
         //child.GetComponent<Prey>().Start();
         //child.name = "Prey";
 
-        child.GetComponent<Predator>().Generate(generation + 1, parent.Copy(new NeuralNetwork(new[] { 24, 5, 3 })), randomRotationAngle);
+        child.GetComponent<Predator>().Generate(generation + 1, parent.Copy(new NeuralNetwork(new[] { 24, 5, 3 })));//, randomRotationAngle);
 
         // child.GetComponent<Prey>().Generation = generation;
         // child.GetComponent<Prey>().Speed = 2;

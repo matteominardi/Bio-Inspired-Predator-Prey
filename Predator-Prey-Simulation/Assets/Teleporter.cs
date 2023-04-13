@@ -22,10 +22,12 @@ public class Teleporter : MonoBehaviour
         topWall = GameObject.Find("topWall");
         bottomWall = GameObject.Find("bottomWall");
 
-        print("leftWall: " + leftWall.transform.position);
-        print("rightWall: " + rightWall.transform.position);
-        print("topWall: " + topWall.transform.position);
-        print("bottomWall: " + bottomWall.transform.position);
+        // print("leftWall: " + leftWall.transform.position);
+        // print("rightWall: " + rightWall.transform.position);
+        // print("topWall: " + topWall.transform.position);
+        // print("bottomWall: " + bottomWall.transform.position);
+
+        
         // if (IsTop)
         // {
         //     _destination = GameObject.FindGameObjectWithTag("BottomWall").GetComponent<Transform>();
@@ -46,13 +48,13 @@ public class Teleporter : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        print("I hit something");
-        print(other.ClosestPoint(transform.position));
+        //print("I hit something");
+        //print(other.ClosestPoint(transform.position));
         Vector2 closestPoint = other.ClosestPoint(transform.position);
 
         if (closestPoint.y < -9)
         {
-            print("I hit the bottom wall " + bottomWall.transform.position.y + 1 + " teleport to: " + new Vector2(other.gameObject.transform.position.x, topWall.transform.position.y + 1));
+            //print("I hit the bottom wall " + bottomWall.transform.position.y + 1 + " teleport to: " + new Vector2(other.gameObject.transform.position.x, topWall.transform.position.y + 1));
             other.gameObject.transform.position = new Vector2(other.gameObject.transform.position.x, topWall.transform.position.y - 1);
         }
         else if (closestPoint.x < -15)
