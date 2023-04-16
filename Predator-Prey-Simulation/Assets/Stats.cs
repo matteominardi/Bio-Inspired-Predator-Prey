@@ -36,7 +36,7 @@ public class Stats : MonoBehaviour
         
         if (hit.collider != null)
         {
-            if (Input.GetMouseButtonDown(0) && hit.transform.tag == "SelectableObject")
+            if (Input.GetMouseButtonDown(0) && (hit.transform.tag == "SelectableObject" || hit.transform.tag == "Predator" || hit.transform.tag == "Prey"))
             {
                 //print("clicked on " + hit.collider.gameObject.name);
                 ISelectable obj;

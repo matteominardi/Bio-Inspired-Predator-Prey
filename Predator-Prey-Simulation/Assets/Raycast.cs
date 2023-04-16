@@ -12,6 +12,7 @@ public class Raycast : MonoBehaviour
     private int _fov;
     private int _viewRange;
     public float[] Distances;
+    public float[] WhoIsThere;
 
     [SerializeField] private LayerMask layerMask;
 
@@ -19,8 +20,8 @@ public class Raycast : MonoBehaviour
         int _numberOfRays,
         int _fov,
         int _viewRange,
-        MonoBehaviour parentObj,
-        float rotationAngle = 0
+        MonoBehaviour parentObj
+        //float rotationAngle = 0
     )
     {
         this._numberOfRays = _numberOfRays;
@@ -29,6 +30,7 @@ public class Raycast : MonoBehaviour
         this._rays = new Vector3[_numberOfRays];
         this._angles = new float[_numberOfRays];
         this.Distances = new float[_numberOfRays];
+        this.WhoIsThere = new float[_numberOfRays];
         this.transform.parent = parentObj.transform;
         Physics2D.queriesStartInColliders = false;
         layerMask = ~(1 << 6);
@@ -105,11 +107,26 @@ public class Raycast : MonoBehaviour
                 //     "I can see a " + hit.collider.gameObject.name + " at " + hit.distance + " units"
                 // );
                 rayLength = hit.distance;
+                float whosThere = 0;
+                if (hit.collider.gameObject.name == "Prey")
+                {
+                    whosThere = 1.0f;
+                }
+                else if (hit.collider.gameObject.name == "Predator")
+                {
+                    whosThere = -1.0f;
+                    color = Color.red;
+
+                }
+
+                WhoIsThere[i] = whosThere;
             }
             else
             {
                 //print("I hit nothing");
                 color = Color.gray;
+                WhoIsThere[i] = 0.0f;
+
             }
             Distances[i] = rayLength < _viewRange ? 1 / rayLength : 0;
             Debug.DrawRay(pos, dir.normalized * rayLength, color);

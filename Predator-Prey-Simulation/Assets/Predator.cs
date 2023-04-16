@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class Predator : MonoBehaviour, ISelectable
 {
+    public static bool CanReproduce = true;
     private NeuralNetwork brain;
     // private Raycast[] inputs;
     public int Lifepoints { get; private set; }
@@ -33,7 +34,7 @@ public class Predator : MonoBehaviour, ISelectable
     public void Generate(int generation, NeuralNetwork parent = null)//, float rotationAngle = 0)
     {
         if (parent == null)
-            brain = new NeuralNetwork(new[] { 24, 5, 3 });
+            brain = new NeuralNetwork(new[] { 48, 5, 3 });
         else
         {
             brain = parent;
@@ -46,8 +47,10 @@ public class Predator : MonoBehaviour, ISelectable
         Speed = 3;
         Generation = generation;
         ReproductionFactor = 0f;
-        _inputs = new float[24];
+        _inputs = new float[48];
         name = "Predator";
+        gameObject.tag = "Predator";
+        
 
         GetComponent<SpriteRenderer>().color = Color.red;
         GetComponent<Raycast>().Generate(24, 90, 60, this);//, rotationAngle);
@@ -60,7 +63,7 @@ public class Predator : MonoBehaviour, ISelectable
         if (!Alive) 
             return;
         
-        if (ReproductionFactor >= 100)
+        if (ReproductionFactor >= 100 && CanReproduce)
         {
             //print("I am reproducing");
             Reproduce(brain, Generation);
@@ -85,10 +88,20 @@ public class Predator : MonoBehaviour, ISelectable
     }
 
     void LateUpdate() {
-        for (int i = 0; i < _inputs.Length; i++)
-        {
-            _inputs[i] = GetComponent<Raycast>().Distances[i];
+
+        for (int i = 0; i < 24; i++) {
+            _inputs[i*2] = GetComponent<Raycast>().Distances[i];
         }
+        for (int i = 0; i < 24; i++) {
+            _inputs[i*2+1] = GetComponent<Raycast>().WhoIsThere[i];
+            //print("i " + i + " " + "whosthere " + _inputs[i*2+1]);
+        }
+        // for (int i = 0; i < _inputs.Length; i++)
+        // {
+        //     print("Whosthere " + i*2 + " "+ (i*2 + 1) + " : " + GetComponent<Raycast>().WhoIsThere[i] + "  " + _inputs.Length + " " +i);
+        //     _inputs[i*2] = GetComponent<Raycast>().Distances[i];
+        //     _inputs[i*2+1] = GetComponent<Raycast>().WhoIsThere[i];
+        // }
         _outputs = brain.FeedForward(_inputs);
 
         float angularVelocity = _outputs[0];// * 2 - 1;
@@ -97,8 +110,8 @@ public class Predator : MonoBehaviour, ISelectable
         transform.Translate(Vector2.up * Time.deltaTime * 2 * (int)Speed * linearVelocity);
         transform.Rotate(new Vector3(0, 0, angularVelocity) * Time.deltaTime * 90 * 2);
 
-        print("Angular Velocity: " + angularVelocity);
-        print("Linear Velocity: " + linearVelocity);
+        //print("Angular Velocity: " + angularVelocity);
+        //print("Linear Velocity: " + linearVelocity);
 
         //GetComponent<Raycast>().UpdateRays(Time.deltaTime * 90 * 2 * (angularVelocity));
         GetComponent<Raycast>().UpdateRays();
@@ -115,16 +128,16 @@ public class Predator : MonoBehaviour, ISelectable
             dir = -dir.normalized;
             // And finally we add force in the direction of dir and multiply it by force. 
             // This will push back the player
-            GetComponent<Rigidbody2D>().AddForce(dir * 16);
+            GetComponent<Rigidbody2D>().AddForce(dir * 40);
         }
 
         if (collision.gameObject.name == "Predator")
         {
-            print("I hit a Predator");
+            //print("I hit a Predator");
         }
         else if (collision.gameObject.name == "Prey")
         {
-            print("I hit a Prey");
+            //print("I hit a Prey");
             Lifepoints -= 25;
             //Fitness += 2;
 
@@ -150,14 +163,14 @@ public class Predator : MonoBehaviour, ISelectable
     {
         Vector2 randomPosition = new Vector2(transform.position.x, transform.position.y) + Random.insideUnitCircle;
         float randomRotationAngle = Random.Range(0.0f, 360.0f);
-        print("Predator Random rotation " + randomRotationAngle);
+        //print("Predator Random rotation " + randomRotationAngle);
         Quaternion randomRotation = Quaternion.Euler(0.0f, 0.0f, randomRotationAngle);
         GameObject child = Instantiate(gameObject, randomPosition, randomRotation);
 
         //child.GetComponent<Prey>().Start();
         //child.name = "Prey";
 
-        child.GetComponent<Predator>().Generate(generation + 1, parent.Copy(new NeuralNetwork(new[] { 24, 5, 3 })));//, randomRotationAngle);
+        child.GetComponent<Predator>().Generate(generation + 1, parent.Copy(new NeuralNetwork(new[] { 48, 5, 3 })));//, randomRotationAngle);
 
         // child.GetComponent<Prey>().Generation = generation;
         // child.GetComponent<Prey>().Speed = 2;

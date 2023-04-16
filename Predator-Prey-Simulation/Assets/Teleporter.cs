@@ -46,28 +46,32 @@ public class Teleporter : MonoBehaviour
         // }
     }
 
-    void OnTriggerEnter2D(Collider2D other)
+    void OnTriggerStay2D(Collider2D other)
     {
         //print("I hit something");
         //print(other.ClosestPoint(transform.position));
         Vector2 closestPoint = other.ClosestPoint(transform.position);
-
-        if (closestPoint.y < -9)
+        // bottom wall
+        //print("closestPoint.y: " + closestPoint.y + " bottomWall.transform.position.y: " + bottomWall.transform.position.y + " bottomWall.transform.localScale.y/2: " + bottomWall.transform.localScale.y/2 + "");
+        if (closestPoint.y < bottomWall.transform.position.y + bottomWall.transform.localScale.y/2 + 1)
         {
             //print("I hit the bottom wall " + bottomWall.transform.position.y + 1 + " teleport to: " + new Vector2(other.gameObject.transform.position.x, topWall.transform.position.y + 1));
-            other.gameObject.transform.position = new Vector2(other.gameObject.transform.position.x, topWall.transform.position.y - 1);
+            other.gameObject.transform.position = new Vector2(other.gameObject.transform.position.x, topWall.transform.position.y - topWall.transform.localScale.y/2 - 1);
         }
-        else if (closestPoint.x < -15)
+        // left wall
+        if (closestPoint.x < leftWall.transform.position.x + leftWall.transform.localScale.x/2 + 1)
         {
-            other.gameObject.transform.position = new Vector2(rightWall.transform.position.x-1, other.gameObject.transform.position.y);
+            other.gameObject.transform.position = new Vector2(rightWall.transform.position.x - rightWall.transform.localScale.x/2-1, other.gameObject.transform.position.y);
         }
-        else if (closestPoint.y > 9)
+        // top wall
+        if (closestPoint.y > topWall.transform.position.y - topWall.transform.localScale.y/2 - 1)
         {
-            other.gameObject.transform.position = new Vector2(other.gameObject.transform.position.x, bottomWall.transform.position.y + 1);
+            other.gameObject.transform.position = new Vector2(other.gameObject.transform.position.x, bottomWall.transform.position.y + bottomWall.transform.localScale.y/2 + 1);
         }
-        else if (closestPoint.x > 15)
+        // right wall
+        if (closestPoint.x > rightWall.transform.position.x - rightWall.transform.localScale.x/2 - 1)
         {
-            other.gameObject.transform.position = new Vector2(leftWall.transform.position.x + 1, other.gameObject.transform.position.y);
+            other.gameObject.transform.position = new Vector2(leftWall.transform.position.x + leftWall.transform.localScale.x/2  + 1, other.gameObject.transform.position.y);
         }
         // if (Vector2.Distance(transform.position, other.transform.position) > Distance)
         // {

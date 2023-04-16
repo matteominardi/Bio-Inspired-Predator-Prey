@@ -15,6 +15,7 @@ public interface ISelectable
 
 public class Prey : MonoBehaviour, ISelectable
 {
+    public static bool CanReproduce = true;
     private NeuralNetwork Brain;
     // private Raycast[] inputs;
     public int Lifepoints { get; private set; }
@@ -49,7 +50,7 @@ public class Prey : MonoBehaviour, ISelectable
     public void Generate(int generation, NeuralNetwork parent = null)//, float rotationAngle=0)
     {
         if (parent == null)
-            Brain = new NeuralNetwork(new[] { 24, 5, 3 });
+            Brain = new NeuralNetwork(new[] { 48, 5, 3 });
         else 
         {
             Brain = parent;
@@ -64,8 +65,10 @@ public class Prey : MonoBehaviour, ISelectable
         _energyExhausted = false;
         _age = Time.time;
         name = "Prey";
+        gameObject.tag = "Prey";
 
         GetComponent<SpriteRenderer>().color = Color.green;
+        //GetComponent<Raycast>().Generate(24, 90, 30, this);//, rotationAngle);
         GetComponent<Raycast>().Generate(24, 90, 30, this);//, rotationAngle);
     }
 
@@ -78,7 +81,7 @@ public class Prey : MonoBehaviour, ISelectable
 
         Fitness += 1.0 * Time.deltaTime;
 
-        if ((Time.time - _age) > 10)
+        if ((Time.time - _age) > 10 && CanReproduce)
         {
             _age = Time.time;
             Reproduce(Brain, Generation);
@@ -162,13 +165,13 @@ public class Prey : MonoBehaviour, ISelectable
             dir = -dir.normalized;
             // And finally we add force in the direction of dir and multiply it by force. 
             // This will push back the player
-            GetComponent<Rigidbody2D>().AddForce(dir * 16);
+            GetComponent<Rigidbody2D>().AddForce(dir * 40);
         }
         
 
         if (collision.gameObject.name == "Predator")
         {
-            print("I hit a Predator");
+            //print("I hit a Predator");
             Lifepoints -= 50;
 
             if (Lifepoints <= 0)
@@ -181,7 +184,7 @@ public class Prey : MonoBehaviour, ISelectable
         }
         else if (collision.gameObject.name == "Prey")
         {
-            print("I hit a Prey");
+            //print("I hit a Prey");
             Lifepoints = Mathf.Min(Lifepoints + 1, 100);
             Fitness += 0.25;
         }
@@ -198,7 +201,7 @@ public class Prey : MonoBehaviour, ISelectable
         //child.GetComponent<Prey>().Start();
         //child.name = "Prey";
 
-        child.GetComponent<Prey>().Generate(generation + 1, parent.Copy(new NeuralNetwork(new[] { 24, 5, 3 })));//, randomRotationAngle);
+        child.GetComponent<Prey>().Generate(generation + 1, parent.Copy(new NeuralNetwork(new[] { 48, 5, 3 })));//, randomRotationAngle);
 
         // child.GetComponent<Prey>().Generation = generation;
         // child.GetComponent<Prey>().Speed = 2;
