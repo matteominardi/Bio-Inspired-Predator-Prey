@@ -33,7 +33,7 @@ public class Raycast : MonoBehaviour
         this.WhoIsThere = new float[_numberOfRays];
         this.transform.parent = parentObj.transform;
         Physics2D.queriesStartInColliders = false;
-        layerMask = ~(1 << 6);
+        layerMask = ~((1 << 6) | (1 << 5));
 
         // float initAngle = (90f + rotationAngle) % 360f - (float)_fov / 2f;
         // float step = (float)_fov / (_numberOfRays - 1);

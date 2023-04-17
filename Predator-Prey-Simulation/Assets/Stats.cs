@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Stats : MonoBehaviour
 {
@@ -13,6 +14,9 @@ public class Stats : MonoBehaviour
     TMPro.TextMeshProUGUI refTxtAlive;
     TMPro.TextMeshProUGUI refTxtGeneration;
 
+    Toggle toggleButton;
+    [SerializeField] private LayerMask layerMask;
+
     bool visible = false;
     // Start is called before the first frame update
     void Start() 
@@ -24,12 +28,18 @@ public class Stats : MonoBehaviour
         refTxtSpeed = gameObject.transform.Find("lblSpeed").transform.Find("txtSpeed").GetComponent<TMPro.TextMeshProUGUI>();
         refTxtAlive = gameObject.transform.Find("lblAlive").transform.Find("txtAlive").GetComponent<TMPro.TextMeshProUGUI>();
         refTxtGeneration = gameObject.transform.Find("lblGeneration").transform.Find("txtGeneration").GetComponent<TMPro.TextMeshProUGUI>();
-        transform.parent.GetComponent<CanvasGroup>().alpha = 0;
+        toggleButton = gameObject.transform.Find("Toggle").GetComponent<Toggle>();
+        layerMask = ~(1<<5);
+
+        transform.GetComponent<CanvasGroup>().alpha = 0;
     }
 
     // Update is called once per frame
     void Update()
     {
+        if (!toggleButton.isOn) {
+            print("toggle off");
+        }
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 
         RaycastHit2D hit = Physics2D.GetRayIntersection(ray);
@@ -53,7 +63,7 @@ public class Stats : MonoBehaviour
 
                 if (visible == false)
                 {
-                    transform.parent.GetComponent<CanvasGroup>().alpha = 1;
+                    transform.GetComponent<CanvasGroup>().alpha = 1;
                     visible = true;
                 }
                 selectedObject = obj;
@@ -76,6 +86,10 @@ public class Stats : MonoBehaviour
 
                 //GetComponent<TMPro.TextMeshProUGUI>().text = health;
             }
+            else {
+                return;
+            }
+            
 
             //Debug.DrawRay(ray.origin, ray.direction * 300, Color.blue);
         }
@@ -104,6 +118,8 @@ public class Stats : MonoBehaviour
             refTxtAlive.text = "";
             refTxtGeneration.text = "";
             mainCamera.GetComponent<MyCamera>().Reset();
+            visible = false;
+            transform.GetComponent<CanvasGroup>().alpha = 0;
         }
     }
 }

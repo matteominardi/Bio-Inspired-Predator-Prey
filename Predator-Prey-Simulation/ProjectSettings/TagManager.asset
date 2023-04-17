@@ -7,6 +7,7 @@ TagManager:
   - SelectableObject
   - Prey
   - Predator
+  - UI
   layers:
   - Default
   - TransparentFX

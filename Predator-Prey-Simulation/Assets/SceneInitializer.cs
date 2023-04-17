@@ -35,7 +35,7 @@ public class SceneInitializer : MonoBehaviour
         int numPrey = GameObject.FindGameObjectsWithTag("Prey").Length;
         int numPredator = GameObject.FindGameObjectsWithTag("Predator").Length;
 
-        if (numPrey > 10) {
+        if (numPrey > 100) {
             Prey.CanReproduce = false;
         } else {
             Prey.CanReproduce = true;
