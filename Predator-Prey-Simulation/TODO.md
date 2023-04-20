@@ -5,8 +5,7 @@ Project Description
 <em>[TODO.md spec & Kanban Board](https://bit.ly/3fCwKfM)</em>
 
 ### Todo
-
-- [ ] Fix interaction when predators and preys collide (if they stay collided the predator won't eat it)  
+ 
 - [ ] Show NNs of a selected individual in order to observe the activations  
 - [ ] Make map size bigger  
 - [ ] Make preys move with their NNs  
@@ -23,4 +22,5 @@ Project Description
 ### Done ✓
 
 - [x] Make timer and graphs always visible modifying the canvas group alpha  
+- [x] Fix interaction when predators and preys collide (if they stay collided the predator won't eat it) 
 

@@ -50,7 +50,7 @@ public class Predator : MonoBehaviour, ISelectable
         _inputs = new float[48];
         name = "Predator";
         gameObject.tag = "Predator";
-        
+
 
         GetComponent<SpriteRenderer>().color = Color.red;
         GetComponent<Raycast>().Generate(24, 90, 60, this);//, rotationAngle);
@@ -60,9 +60,9 @@ public class Predator : MonoBehaviour, ISelectable
     // Update is called once per frame
     void Update()
     {
-        if (!Alive) 
+        if (!Alive)
             return;
-        
+
         if (ReproductionFactor >= 100 && CanReproduce)
         {
             //print("I am reproducing");
@@ -87,13 +87,16 @@ public class Predator : MonoBehaviour, ISelectable
         }
     }
 
-    void LateUpdate() {
+    void LateUpdate()
+    {
 
-        for (int i = 0; i < 24; i++) {
-            _inputs[i*2] = GetComponent<Raycast>().Distances[i];
+        for (int i = 0; i < 24; i++)
+        {
+            _inputs[i * 2] = GetComponent<Raycast>().Distances[i];
         }
-        for (int i = 0; i < 24; i++) {
-            _inputs[i*2+1] = GetComponent<Raycast>().WhoIsThere[i];
+        for (int i = 0; i < 24; i++)
+        {
+            _inputs[i * 2 + 1] = GetComponent<Raycast>().WhoIsThere[i];
             //print("i " + i + " " + "whosthere " + _inputs[i*2+1]);
         }
         // for (int i = 0; i < _inputs.Length; i++)
@@ -119,9 +122,10 @@ public class Predator : MonoBehaviour, ISelectable
 
     }
 
-    void OnCollisionEnter2D(Collision2D collision)
+    void OnCollisionStay2D(Collision2D collision)
     {
-        if (collision.gameObject.name == "Prey" || collision.gameObject.name == "Predator") {
+        if (collision.gameObject.name == "Prey" || collision.gameObject.name == "Predator")
+        {
             // Calculate Angle Between the collision point and the player
             Vector2 dir = collision.contacts[0].point - new Vector2(transform.position.x, transform.position.y);
             // We then get the opposite (-Vector3) and normalize it
@@ -138,7 +142,7 @@ public class Predator : MonoBehaviour, ISelectable
         else if (collision.gameObject.name == "Prey")
         {
             //print("I hit a Prey");
-            Lifepoints -= 25;
+            Lifepoints -= 5;
             //Fitness += 2;
 
             if (collision.gameObject.GetComponent<Prey>().Lifepoints <= 0)

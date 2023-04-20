@@ -51,7 +51,7 @@ public class Prey : MonoBehaviour, ISelectable
     {
         if (parent == null)
             Brain = new NeuralNetwork(new[] { 48, 5, 3 });
-        else 
+        else
         {
             Brain = parent;
             Brain.Mutate(20, 0.5f);
@@ -152,13 +152,15 @@ public class Prey : MonoBehaviour, ISelectable
         }
     }
 
-    void LateUpdate() {
-        
+    void LateUpdate()
+    {
+
     }
 
-    void OnCollisionEnter2D(Collision2D collision)
+    void OnCollisionStay2D(Collision2D collision)
     {
-        if (collision.gameObject.name == "Prey" || collision.gameObject.name == "Predator") {
+        if (collision.gameObject.name == "Prey" || collision.gameObject.name == "Predator")
+        {
             // Calculate Angle Between the collision point and the player
             Vector2 dir = collision.contacts[0].point - new Vector2(transform.position.x, transform.position.y);
             // We then get the opposite (-Vector3) and normalize it
@@ -167,12 +169,12 @@ public class Prey : MonoBehaviour, ISelectable
             // This will push back the player
             GetComponent<Rigidbody2D>().AddForce(dir * 40);
         }
-        
+
 
         if (collision.gameObject.name == "Predator")
         {
             //print("I hit a Predator");
-            Lifepoints -= 50;
+            Lifepoints -= 15;
 
             if (Lifepoints <= 0)
             {
