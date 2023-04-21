@@ -2,72 +2,60 @@ using System.Threading;
 
 public static class CanReproduce
 {
-    private static int preysCounter = 0;
-    private static int predatorsCounter = 0;
-    private static bool canPreysReproduce = true;
-    private static bool canPredatorsReproduce = true;
-
-    // public int PreysCounter
-    // {
-    //     get { return Interlocked.CompareExchange(ref preysCounter, 0, 1); } // compara il valore corrente e l'expectedValue, se sono uguali, il valore di preysCounter viene sostituito con newValue e ritorna il valore di preysCounter vecchio
-    //     set { Interlocked.Exchange(ref preysCounter, value); }              // rimpiazza il valore di preysCounter con il valore di value e ritorna il vecchio valore di preysCounter
-    // }
-
-    // public int PredatorsCounter
-    // {
-    //     get { return Interlocked.CompareExchange(ref counter, 0, 0); }
-    //     set { Interlocked.Exchange(ref counter, value); }
-    // }
-
-    // public bool CanPreysReproduce
-    // {
-    //     get { return Interlocked.CompareExchange(ref canPreysReproduce, true, true) == true; }
-    //     set { Interlocked.Exchange(ref canPreysReproduce, value ? true : 0); }
-    // }
-
-    // public bool CanPredatorsReproduce
-    // {
-    //     get { return Interlocked.CompareExchange(ref canPredatorsReproduce, true, true) == true; }
-    //     set { Interlocked.Exchange(ref canPredatorsReproduce, value ? true : 0); }
-    // }
+    private static int _preysCounter = 0;
+    private static int _predatorsCounter = 0;
+    private static int _canPreysReproduce = 1;
+    private static int _canPredatorsReproduce = 1;
+    private static int _maxPreysAllowed = 15;
+    private static int _maxPredatorsAllowed = 15;
 
     public static void IncrementPreysCounter()
     {
-        preysCounter = Interlocked.Increment(ref preysCounter);
+        _preysCounter = Interlocked.Increment(ref _preysCounter);
 
-        if (preysCounter == 100)
+        if (_preysCounter >= _maxPreysAllowed)
         {
-            Interlocked.Exchange(ref canPreysReproduce, false);
+            Interlocked.Exchange(ref _canPreysReproduce, 0);
         }
     }
 
     public static void IncrementPredatorsCounter()
     {
-        predatorsCounter = Interlocked.Increment(ref predatorsCounter);
+        _predatorsCounter = Interlocked.Increment(ref _predatorsCounter);
 
-        if (predatorsCounter == 100)
+        if (_predatorsCounter >= _maxPredatorsAllowed)
         {
-            Interlocked.Exchange(ref canPredatorsReproduce, false);
+            Interlocked.Exchange(ref _canPredatorsReproduce, 0);
         }
     }
 
     public static void DecrementPreysCounter()
     {
-        preysCounter = Interlocked.Decrement(ref preysCounter);
+        _preysCounter = Interlocked.Decrement(ref _preysCounter);
 
-        if (preysCounter < 100)
+        if (_preysCounter < _maxPreysAllowed)
         {
-            Interlocked.Exchange(ref canPreysReproduce, true);
+            Interlocked.Exchange(ref _canPreysReproduce, 1);
         }
     }
 
     public static void DecrementPredatorsCounter()
     {
-        preysCounter = Interlocked.Decrement(ref predatorsCounter);
+        _preysCounter = Interlocked.Decrement(ref _predatorsCounter);
 
-        if (predatorsCounter < 100)
+        if (_predatorsCounter < _maxPredatorsAllowed)
         {
-            Interlocked.Exchange(ref canPredatorsReproduce, true);
+            Interlocked.Exchange(ref _canPredatorsReproduce, 1);
         }
+    }
+
+    public static bool CanPreysReproduce()
+    {
+        return _canPreysReproduce == 1;
+    }
+
+    public static bool CanPredatorsReproduce()
+    {
+        return _canPredatorsReproduce == 1;
     }
 }

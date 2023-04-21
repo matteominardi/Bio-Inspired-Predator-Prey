@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Predator : MonoBehaviour, ISelectable
 {
-    public static bool CanReproduce = true;
     private NeuralNetwork brain;
     // private Raycast[] inputs;
     public int Lifepoints { get; private set; }
@@ -33,6 +32,7 @@ public class Predator : MonoBehaviour, ISelectable
 
     public void Generate(int generation, NeuralNetwork parent = null)//, float rotationAngle = 0)
     {
+        CanReproduce.IncrementPredatorsCounter();
         if (parent == null)
             brain = new NeuralNetwork(new[] { 48, 5, 3 });
         else
@@ -63,7 +63,8 @@ public class Predator : MonoBehaviour, ISelectable
         if (!Alive)
             return;
 
-        if (ReproductionFactor >= 100 && CanReproduce)
+        // if (ReproductionFactor >= 100 && CanReproduce)
+        if (ReproductionFactor >= 100 && CanReproduce.CanPredatorsReproduce())
         {
             //print("I am reproducing");
             Reproduce(brain, Generation);
@@ -158,6 +159,7 @@ public class Predator : MonoBehaviour, ISelectable
                 print("I am dead");
                 Alive = false;
                 Fitness = -1;
+                CanReproduce.DecrementPredatorsCounter();
                 Destroy(gameObject);
             }
         }

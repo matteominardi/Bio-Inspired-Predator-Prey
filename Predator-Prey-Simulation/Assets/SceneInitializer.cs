@@ -30,21 +30,21 @@ public class SceneInitializer : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
-    {
-        int numPrey = GameObject.FindGameObjectsWithTag("Prey").Length;
-        int numPredator = GameObject.FindGameObjectsWithTag("Predator").Length;
+    // void Update()
+    // {
+    //     int numPrey = GameObject.FindGameObjectsWithTag("Prey").Length;
+    //     int numPredator = GameObject.FindGameObjectsWithTag("Predator").Length;
 
-        if (numPrey > 100) {
-            Prey.CanReproduce = false;
-        } else {
-            Prey.CanReproduce = true;
-        }
+    //     if (numPrey > 100) {
+    //         Prey.CanReproduce = false;
+    //     } else {
+    //         Prey.CanReproduce = true;
+    //     }
 
-        if (numPredator > 10) {
-            Predator.CanReproduce = false;
-        } else {
-            Predator.CanReproduce = true;
-        }
-    }
+    //     if (numPredator > 10) {
+    //         Predator.CanReproduce = false;
+    //     } else {
+    //         Predator.CanReproduce = true;
+    //     }
+    // }
 }

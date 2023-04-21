@@ -14,7 +14,6 @@ public interface ISelectable
 
 public class Prey : MonoBehaviour, ISelectable
 {
-    //public static bool CanReproduce = true;
     private NeuralNetwork brain;
     // private Raycast[] inputs;
     public int Lifepoints { get; private set; }
@@ -50,6 +49,7 @@ public class Prey : MonoBehaviour, ISelectable
 
     public void Generate(int generation, NeuralNetwork parent = null)//, float rotationAngle=0)
     {
+        CanReproduce.IncrementPreysCounter();
         if (parent == null)
             brain = new NeuralNetwork(new[] { 48, 5, 3 });
         else
@@ -82,7 +82,8 @@ public class Prey : MonoBehaviour, ISelectable
 
         Fitness += 1.0 * Time.deltaTime;
 
-        if ((Time.time - _age) > 10 && CanReproduce)
+        // if ((Time.time - _age) > 10 && CanReproduce)
+        if ((Time.time - _age) > 10 && CanReproduce.CanPreysReproduce())
         {
             _age = Time.time;
             Reproduce(brain, Generation);
@@ -199,6 +200,7 @@ public class Prey : MonoBehaviour, ISelectable
                 print("I am dead");
                 Alive = false;
                 Fitness = -1;
+                CanReproduce.DecrementPreysCounter();
                 Destroy(gameObject);
             }
         }
