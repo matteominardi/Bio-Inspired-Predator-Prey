@@ -10,13 +10,12 @@ public interface ISelectable
     float Energy { get; }
     double Speed { get; }
     public int Generation { get; }
-
 }
 
 public class Prey : MonoBehaviour, ISelectable
 {
-    public static bool CanReproduce = true;
-    private NeuralNetwork Brain;
+    //public static bool CanReproduce = true;
+    private NeuralNetwork brain;
     // private Raycast[] inputs;
     public int Lifepoints { get; private set; }
     public double Fitness { get; private set; }
@@ -29,6 +28,8 @@ public class Prey : MonoBehaviour, ISelectable
     private bool _energyExhausted;
 
     private float _age;
+    private float[] _inputs;
+    private float[] _outputs;
 
     // Start is called before the first frame update
     void Start()
@@ -50,11 +51,11 @@ public class Prey : MonoBehaviour, ISelectable
     public void Generate(int generation, NeuralNetwork parent = null)//, float rotationAngle=0)
     {
         if (parent == null)
-            Brain = new NeuralNetwork(new[] { 48, 5, 3 });
+            brain = new NeuralNetwork(new[] { 48, 5, 3 });
         else
         {
-            Brain = parent;
-            Brain.Mutate(20, 0.5f);
+            brain = parent;
+            brain.Mutate(20, 0.5f);
         }
         Lifepoints = 100;
         Fitness = 0;
@@ -84,7 +85,7 @@ public class Prey : MonoBehaviour, ISelectable
         if ((Time.time - _age) > 10 && CanReproduce)
         {
             _age = Time.time;
-            Reproduce(Brain, Generation);
+            Reproduce(brain, Generation);
         }
 
         if (Energy <= 0f)
@@ -154,6 +155,23 @@ public class Prey : MonoBehaviour, ISelectable
 
     void LateUpdate()
     {
+        for (int i = 0; i < 24; i++)
+        {
+            _inputs[i * 2] = GetComponent<Raycast>().Distances[i];
+        }
+        for (int i = 0; i < 24; i++)
+        {
+            _inputs[i * 2 + 1] = GetComponent<Raycast>().WhoIsThere[i];
+        }
+        _outputs = brain.FeedForward(_inputs);
+
+        float angularVelocity = _outputs[0];
+        float linearVelocity = _outputs[1];
+
+        transform.Translate(Vector2.up * Time.deltaTime * 2 * (int)Speed * linearVelocity);
+        transform.Rotate(new Vector3(0, 0, angularVelocity) * Time.deltaTime * 90 * 2);
+
+        GetComponent<Raycast>().UpdateRays();
 
     }
 

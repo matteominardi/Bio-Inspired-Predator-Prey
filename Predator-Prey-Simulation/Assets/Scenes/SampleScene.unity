@@ -227,8 +227,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 18453530}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -20.29, y: -1.33, z: 0}
-  m_LocalScale: {x: 4, y: 31.802717, z: 1}
+  m_LocalPosition: {x: -105, y: 0, z: 0}
+  m_LocalScale: {x: 4, y: 116, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 462628709}
@@ -473,8 +473,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 53678880}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 20.089998, y: -0.059199452, z: 0}
-  m_LocalScale: {x: 4, y: 29.108341, z: 1}
+  m_LocalPosition: {x: 105, y: -0.059199452, z: 0}
+  m_LocalScale: {x: 4, y: 116, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 462628709}
@@ -584,8 +584,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 117419522}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.9319, y: -12.2081995, z: 0}
-  m_LocalScale: {x: 57.583042, y: 4.032842, z: 1}
+  m_LocalPosition: {x: 0, y: -60, z: 0}
+  m_LocalScale: {x: 205.5, y: 4.032842, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 462628709}
@@ -1416,7 +1416,7 @@ Camera:
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: 13.91
+  orthographic size: 60.91
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -2326,8 +2326,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1085629060}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.2126, y: 12.1488, z: 0}
-  m_LocalScale: {x: 52.14466, y: 4.0339804, z: 1}
+  m_LocalPosition: {x: 0, y: 60, z: 0}
+  m_LocalScale: {x: 205.5, y: 4.0339804, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 462628709}
@@ -3186,7 +3186,7 @@ MeshRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1776371156}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 0
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -3237,8 +3237,8 @@ Transform:
   m_GameObject: {fileID: 1776371156}
   m_LocalRotation: {x: 0, y: 0.70710677, z: -0.70710677, w: 0}
   m_LocalPosition: {x: -0.1449, y: -0.0057, z: 96.1}
-  m_LocalScale: {x: 3.5747993, y: 1, z: 2.010658}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 20.5748, y: 5.7555103, z: 11.572364}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 7

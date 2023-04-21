@@ -39,7 +39,7 @@ public class WindowGraph : MonoBehaviour
         canvas = gameObject.transform.parent.gameObject;
         _lineRendererPrey.transform.SetParent(transform.Find("PreyGraphContainer"), false);
         _lineRendererPredator.transform.SetParent(transform.Find("PredatorGraphContainer"), false);
-        float[] valueList = new float[] { 0,0,0,0,0,0,0,0,0,0,0,0,0,0 };
+        float[] valueList = new float[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
         preyBuffer = new CircularBuffer<float>(valueList);
         predatorBuffer = new CircularBuffer<float>(valueList);
         timer = Time.time;
@@ -71,7 +71,7 @@ public class WindowGraph : MonoBehaviour
                 tempPrey.Add(value);
             foreach (float value in valuesInBufferPredator)
                 tempPredator.Add(value);
-            
+
             // print("result:");
             // string resultString = "";
             // foreach (float value in result)
@@ -83,7 +83,7 @@ public class WindowGraph : MonoBehaviour
         // _lineRenderer.positionCount = 0;
         // //float canvasAlpha = canvas.GetComponent<CanvasGroup>().alpha;
         // print("canvasAlpha: " + canvasAlpha);
-        
+
         //float numberOfPreys = GameObject.FindGameObjectsWithTag("Prey").Length;
         //preyBuffer.Enqueue(numberOfPreys);
         //List<float> valueList = new List<float>() { 0,Random.Range(2,90),9,8,7,6, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,0 };
@@ -116,18 +116,20 @@ public class WindowGraph : MonoBehaviour
     //     return gameObject;
     // }
 
-    private void ShowGraph(float[] valueList, RectTransform graphContainer, LineRenderer lineRenderer, bool prey) {
-        float xSize = graphContainer.sizeDelta.x / (valueList.Length+1);
+    private void ShowGraph(float[] valueList, RectTransform graphContainer, LineRenderer lineRenderer, bool prey)
+    {
+        float xSize = graphContainer.sizeDelta.x / (valueList.Length + 1);
         float yMax = 100f;
         float graphHeight = graphContainer.sizeDelta.y;
 
         //GameObject lastDot = null;
         lineRenderer.positionCount = valueList.Length;
         float canvasAlpha = canvas.GetComponent<CanvasGroup>().alpha;
-        if (canvasAlpha == 0) {
+        if (canvasAlpha == 0)
+        {
             //print("canvasAlpha == 0");
-            lineRenderer.startColor =      new Color(1,1,1,0.0f);
-            lineRenderer.endColor =        new Color(1,1,1,0.0f);
+            lineRenderer.startColor = new Color(1, 1, 1, 0.0f);
+            lineRenderer.endColor = new Color(1, 1, 1, 0.0f);
             //_lineRenderer.material.color =  new Color(1,1,1,0.5f);
             //_lineRenderer.GetComponent<Renderer>().material.SetColor("_TintColor", new Color(1, 1, 1, 0.0f));
             //_lineRenderer.GetComponent<Material>().color = new Color(1, 1, 1, 0.0f);
@@ -136,33 +138,34 @@ public class WindowGraph : MonoBehaviour
 
             //_lineRenderer.sharedMaterial.color = new Color(1,1,1,0f);
 
-        } 
-        else 
+        }
+        else
         {
             if (prey)
             {
-                lineRenderer.startColor =     new Color(0,1,0,canvasAlpha);
-                lineRenderer.endColor =       new Color(0,1,0,canvasAlpha);
+                lineRenderer.startColor = new Color(0, 1, 0, canvasAlpha);
+                lineRenderer.endColor = new Color(0, 1, 0, canvasAlpha);
             }
-            else 
+            else
             {
-                lineRenderer.startColor =     new Color(1,0,0,canvasAlpha);
-                lineRenderer.endColor =       new Color(1,0,0,canvasAlpha);
+                lineRenderer.startColor = new Color(1, 0, 0, canvasAlpha);
+                lineRenderer.endColor = new Color(1, 0, 0, canvasAlpha);
             }
             //_lineRenderer.material.color = new Color(1,1,1,canvasAlpha);
             //_lineRenderer.GetComponent<Renderer>().material.SetColor("_TintColor", new Color(1, 1, 1, 1.0f));
             //_lineRenderer.GetComponent<Material>().color = new Color(1, 1, 1, 0.0f);
             //_lineRenderer.material.color = new Color(1, 1, 1, 1.0f);
-            
+
 
             //_lineRenderer.sharedMaterial.color = new Color(1,1,1,1f);
 
         }
-        for (int i = 0; i < valueList.Length; i++) {
+        for (int i = 0; i < valueList.Length; i++)
+        {
             float xPosition = xSize + i * xSize;
             float yPosition = valueList[i] / yMax * graphHeight;
             //GameObject currentDot = CreateDot(new Vector2(xPosition+3, yPosition+3));
-            lineRenderer.SetPosition(i, new Vector3(xPosition+3, yPosition+3, 0));
+            lineRenderer.SetPosition(i, new Vector3(xPosition + 3, yPosition + 3, 0));
             // if (lastDot != null) {
             //     CreateDotConnection(lastDot.GetComponent<RectTransform>().anchoredPosition, currentDot.GetComponent<RectTransform>().anchoredPosition);
             // }
