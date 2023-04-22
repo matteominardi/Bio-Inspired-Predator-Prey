@@ -2,12 +2,14 @@ using System.Threading;
 
 public static class CanReproduce
 {
+    private static readonly object _lockPreys = new object();
+    private static readonly object _lockPredators = new object();
     private static int _preysCounter = 0;
     private static int _predatorsCounter = 0;
     private static int _canPreysReproduce = 1;
     private static int _canPredatorsReproduce = 1;
-    private static int _maxPreysAllowed = 15;
-    private static int _maxPredatorsAllowed = 15;
+    private static int _maxPreysAllowed = 32;
+    private static int _maxPredatorsAllowed = 21;
 
     public static void IncrementPreysCounter()
     {
@@ -31,31 +33,65 @@ public static class CanReproduce
 
     public static void DecrementPreysCounter()
     {
-        _preysCounter = Interlocked.Decrement(ref _preysCounter);
-
-        if (_preysCounter < _maxPreysAllowed)
+        lock (_lockPreys)
         {
-            Interlocked.Exchange(ref _canPreysReproduce, 1);
+            _preysCounter = Interlocked.Decrement(ref _preysCounter);
+
+            if (_preysCounter < _maxPreysAllowed)
+            {
+                Interlocked.Exchange(ref _canPreysReproduce, 1);
+            }
         }
     }
 
     public static void DecrementPredatorsCounter()
     {
-        _preysCounter = Interlocked.Decrement(ref _predatorsCounter);
-
-        if (_predatorsCounter < _maxPredatorsAllowed)
+        lock (_lockPredators)
         {
-            Interlocked.Exchange(ref _canPredatorsReproduce, 1);
+            _preysCounter = Interlocked.Decrement(ref _predatorsCounter);
+
+            if (_predatorsCounter < _maxPredatorsAllowed)
+            {
+                Interlocked.Exchange(ref _canPredatorsReproduce, 1);
+            }
         }
     }
 
     public static bool CanPreysReproduce()
     {
-        return _canPreysReproduce == 1;
+        lock (_lockPreys)
+        {
+            int res = Interlocked.CompareExchange(ref _canPreysReproduce, 1, 1);
+            if (res == 1)
+            {
+                IncrementPreysCounter();
+                return true;
+            }
+            return false;
+        }
     }
 
     public static bool CanPredatorsReproduce()
     {
-        return _canPredatorsReproduce == 1;
+        lock (_lockPredators)
+        {
+            int res = Interlocked.CompareExchange(ref _canPredatorsReproduce, 1, 1);
+            if (res == 1)
+            {
+                IncrementPredatorsCounter();
+                return true;
+            }
+            return false;
+        }
+    }
+
+    public static int MaxPreysAllowed()
+    {
+        return _maxPreysAllowed;
+    }
+
+    public static int MaxPredatorsAllowed()
+    {
+        return _maxPredatorsAllowed;
     }
 }

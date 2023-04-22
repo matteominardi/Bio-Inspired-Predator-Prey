@@ -6,11 +6,9 @@ Project Description
 
 ### Todo
  
-- [ ] Show NNs of a selected individual in order to observe the activations  
-- [ ] Make map size bigger  
+- [ ] Show NNs of a selected individual in order to observe the activations    
 - [ ] Make preys move with their NNs  
-- [ ] Make timer panel resize when it grows  
-- [ ] set correctly the max on the y axis on the plots  
+- [ ] Make timer panel resize when it grows    
 - [ ] fix cap on reproduction  
 - [ ] save and load NNs to rerun with "learned" NNs  
 - [ ] multi-run with adaptive speed/size  
@@ -22,5 +20,7 @@ Project Description
 ### Done ✓
 
 - [x] Make timer and graphs always visible modifying the canvas group alpha  
-- [x] Fix interaction when predators and preys collide (if they stay collided the predator won't eat it) 
+- [x] Fix interaction when predators and preys collide (if they stay collided the predator won't eat it)
+- [x] Make map size bigger 
+- [x] set correctly the max on the y axis on the plots
 

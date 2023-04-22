@@ -14,6 +14,7 @@ public interface ISelectable
 
 public class Prey : MonoBehaviour, ISelectable
 {
+    private readonly object _lockPreys = new object();
     private NeuralNetwork brain;
     // private Raycast[] inputs;
     public int Lifepoints { get; private set; }
@@ -49,28 +50,36 @@ public class Prey : MonoBehaviour, ISelectable
 
     public void Generate(int generation, NeuralNetwork parent = null)//, float rotationAngle=0)
     {
-        CanReproduce.IncrementPreysCounter();
-        if (parent == null)
-            brain = new NeuralNetwork(new[] { 48, 5, 3 });
-        else
+        lock (_lockPreys)
         {
-            brain = parent;
-            brain.Mutate(20, 0.5f);
-        }
-        Lifepoints = 100;
-        Fitness = 0;
-        Alive = true;
-        Energy = 100;
-        Speed = 2;
-        Generation = generation;
-        _energyExhausted = false;
-        _age = Time.time;
-        name = "Prey";
-        gameObject.tag = "Prey";
+            if (!CanReproduce.CanPreysReproduce())
+            {
+                Destroy(gameObject);
+                return;
+            }
 
-        GetComponent<SpriteRenderer>().color = Color.green;
-        //GetComponent<Raycast>().Generate(24, 90, 30, this);//, rotationAngle);
-        GetComponent<Raycast>().Generate(24, 90, 30, this);//, rotationAngle);
+            if (parent == null)
+                brain = new NeuralNetwork(new[] { 48, 5, 3 });
+            else
+            {
+                brain = parent;
+                brain.Mutate(20, 0.5f);
+            }
+            Lifepoints = 100;
+            Fitness = 0;
+            Alive = true;
+            Energy = 100;
+            Speed = 2;
+            Generation = generation;
+            _energyExhausted = false;
+            _age = Time.time;
+            name = "Prey";
+            gameObject.tag = "Prey";
+
+            GetComponent<SpriteRenderer>().color = Color.green;
+            //GetComponent<Raycast>().Generate(24, 90, 30, this);//, rotationAngle);
+            GetComponent<Raycast>().Generate(24, 90, 30, this);//, rotationAngle);
+        }
     }
 
     // Update is called once per frame
@@ -83,10 +92,14 @@ public class Prey : MonoBehaviour, ISelectable
         Fitness += 1.0 * Time.deltaTime;
 
         // if ((Time.time - _age) > 10 && CanReproduce)
-        if ((Time.time - _age) > 10 && CanReproduce.CanPreysReproduce())
+        // if ((Time.time - _age) > 10 && CanReproduce.CanPreysReproduce())
+        if ((Time.time - _age) > 10)
         {
-            _age = Time.time;
-            Reproduce(brain, Generation);
+            lock (_lockPreys)
+            {
+                _age = Time.time;
+                Reproduce(brain, Generation);
+            }
         }
 
         if (Energy <= 0f)
@@ -197,11 +210,14 @@ public class Prey : MonoBehaviour, ISelectable
 
             if (Lifepoints <= 0)
             {
-                print("I am dead");
-                Alive = false;
-                Fitness = -1;
-                CanReproduce.DecrementPreysCounter();
-                Destroy(gameObject);
+                lock (_lockPreys)
+                {
+                    print("I am dead");
+                    Alive = false;
+                    Fitness = -1;
+                    CanReproduce.DecrementPreysCounter();
+                    Destroy(gameObject);
+                }
             }
         }
         else if (collision.gameObject.name == "Prey")
