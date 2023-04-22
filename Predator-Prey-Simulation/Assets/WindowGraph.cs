@@ -119,7 +119,7 @@ public class WindowGraph : MonoBehaviour
     private void ShowGraph(float[] valueList, RectTransform graphContainer, LineRenderer lineRenderer, bool prey)
     {
         float xSize = graphContainer.sizeDelta.x / (valueList.Length + 1);
-        float yMax = prey == true ? CanReproduce.MaxPreysAllowed() + 5 : CanReproduce.MaxPredatorsAllowed() + 5;
+        float yMax = prey == true ? Prey.MaxPrey + 5 : Predator.MaxPredator + 5;
         float graphHeight = graphContainer.sizeDelta.y;
 
         //GameObject lastDot = null;

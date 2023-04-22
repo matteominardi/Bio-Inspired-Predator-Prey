@@ -38,7 +38,7 @@ public class Stats : MonoBehaviour
     void Update()
     {
         if (!toggleButton.isOn) {
-            print("toggle off");
+            //print("toggle off");
         }
         Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 

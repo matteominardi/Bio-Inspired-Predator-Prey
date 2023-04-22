@@ -1,9 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class Predator : MonoBehaviour, ISelectable
 {
+    public static int MaxPredator = 32;
+    public static int Counter = 0;
     private NeuralNetwork brain;
     // private Raycast[] inputs;
     public int Lifepoints { get; private set; }
@@ -32,11 +35,11 @@ public class Predator : MonoBehaviour, ISelectable
 
     public void Generate(int generation, NeuralNetwork parent = null)//, float rotationAngle = 0)
     {
-        if (!CanReproduce.CanPredatorsReproduce())
-        {
-            Destroy(gameObject);
-            return;
-        }
+        // if (!CanReproduce.CanPredatorsReproduce())
+        // {
+        //     Destroy(gameObject);
+        //     return;
+        // }
 
         if (parent == null)
             brain = new NeuralNetwork(new[] { 48, 5, 3 });
@@ -70,7 +73,7 @@ public class Predator : MonoBehaviour, ISelectable
 
         // if (ReproductionFactor >= 100 && CanReproduce)
         // if (ReproductionFactor >= 100 && CanReproduce.CanPredatorsReproduce())
-        if (ReproductionFactor >= 100)
+        if (ReproductionFactor >= 100 && Counter < MaxPredator)
         {
             //print("I am reproducing");
             Reproduce(brain, Generation);
@@ -86,6 +89,7 @@ public class Predator : MonoBehaviour, ISelectable
             print("I am dead");
             Alive = false;
             Fitness = -1;
+            Counter--;
             Destroy(gameObject);
         }
         else
@@ -131,16 +135,16 @@ public class Predator : MonoBehaviour, ISelectable
 
     void OnCollisionStay2D(Collision2D collision)
     {
-        if (collision.gameObject.name == "Prey" || collision.gameObject.name == "Predator")
-        {
-            // Calculate Angle Between the collision point and the player
-            Vector2 dir = collision.contacts[0].point - new Vector2(transform.position.x, transform.position.y);
-            // We then get the opposite (-Vector3) and normalize it
-            dir = -dir.normalized;
-            // And finally we add force in the direction of dir and multiply it by force. 
-            // This will push back the player
-            GetComponent<Rigidbody2D>().AddForce(dir * 40);
-        }
+        // if (collision.gameObject.name == "Prey" || collision.gameObject.name == "Predator")
+        // {
+        //     // Calculate Angle Between the collision point and the player
+        //     Vector2 dir = collision.contacts[0].point - new Vector2(transform.position.x, transform.position.y);
+        //     // We then get the opposite (-Vector3) and normalize it
+        //     dir = -dir.normalized;
+        //     // And finally we add force in the direction of dir and multiply it by force. 
+        //     // This will push back the player
+        //     GetComponent<Rigidbody2D>().AddForce(dir * 40);
+        // }
 
         if (collision.gameObject.name == "Predator")
         {
@@ -173,8 +177,9 @@ public class Predator : MonoBehaviour, ISelectable
 
     void Reproduce(NeuralNetwork parent, int generation)
     {
-        Vector2 randomPosition = new Vector2(transform.position.x, transform.position.y) + Random.insideUnitCircle;
-        float randomRotationAngle = Random.Range(0.0f, 360.0f);
+        if (Counter == MaxPredator) return;
+        Vector2 randomPosition = new Vector2(transform.position.x, transform.position.y) + UnityEngine.Random.insideUnitCircle;
+        float randomRotationAngle = UnityEngine.Random.Range(0.0f, 360.0f);
         //print("Predator Random rotation " + randomRotationAngle);
         Quaternion randomRotation = Quaternion.Euler(0.0f, 0.0f, randomRotationAngle);
         GameObject child = Instantiate(gameObject, randomPosition, randomRotation);
@@ -183,6 +188,7 @@ public class Predator : MonoBehaviour, ISelectable
         //child.name = "Prey";
 
         child.GetComponent<Predator>().Generate(generation + 1, parent.Copy(new NeuralNetwork(new[] { 48, 5, 3 })));//, randomRotationAngle);
+        Counter++;
 
         // child.GetComponent<Prey>().Generation = generation;
         // child.GetComponent<Prey>().Speed = 2;
@@ -190,5 +196,16 @@ public class Predator : MonoBehaviour, ISelectable
         // child.GetComponent<Prey>().Brain.Mutate(20, 0.5f);
 
         // child.GetComponent<Prey>().GetComponent<Raycast>().Generate(24, 300, 30);
+    }
+
+
+    public void SaveMyBrain() 
+    {
+        brain.Save("./Assets/PretrainedNetworks/PredatorBrain" + DateTime.Now.ToString("dd-MM-yyyy") + ".txt");
+    }
+
+    public void LoadMyBrain(string path)
+    {
+        brain.Load(path);
     }
 }
