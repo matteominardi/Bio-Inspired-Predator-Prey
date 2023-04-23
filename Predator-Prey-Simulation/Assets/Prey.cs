@@ -11,6 +11,8 @@ public interface ISelectable
     float Energy { get; }
     double Speed { get; }
     public int Generation { get; }
+    public Raycast Raycast { get; }
+
 }
 
 public class Prey : MonoBehaviour, ISelectable
@@ -27,6 +29,8 @@ public class Prey : MonoBehaviour, ISelectable
     public float Energy { get; private set; }
     public double Speed { get; private set; }
     public int Generation { get; private set; }
+    public Raycast Raycast { get; private set; }
+
 
     private bool _energyExhausted;
 
@@ -64,7 +68,7 @@ public class Prey : MonoBehaviour, ISelectable
             // }
             //print("NUMBER OF PREYS " + CanReproduce.PreysCounter());
             if (parent == null)
-                brain = new NeuralNetwork(new[] { 48, 5, 3 });
+                brain = new NeuralNetwork(new[] { 48, 5, 2 });
             else
             {
                 brain = parent;
@@ -84,7 +88,8 @@ public class Prey : MonoBehaviour, ISelectable
 
             GetComponent<SpriteRenderer>().color = Color.green;
             //GetComponent<Raycast>().Generate(24, 90, 30, this);//, rotationAngle);
-            GetComponent<Raycast>().Generate(24, 90, 30, this);//, rotationAngle);
+            this.Raycast = GetComponent<Raycast>();
+            this.Raycast.Generate(24, 90, 30, this);//, rotationAngle);
         //}
     }
 

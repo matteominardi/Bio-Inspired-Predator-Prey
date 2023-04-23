@@ -13,6 +13,7 @@ public class Raycast : MonoBehaviour
     private int _viewRange;
     public float[] Distances;
     public float[] WhoIsThere;
+    public bool toggleShowRays;
 
     [SerializeField] private LayerMask layerMask;
 
@@ -32,6 +33,7 @@ public class Raycast : MonoBehaviour
         this.Distances = new float[_numberOfRays];
         this.WhoIsThere = new float[_numberOfRays];
         this.transform.parent = parentObj.transform;
+        this.toggleShowRays = false;
         Physics2D.queriesStartInColliders = false;
         layerMask = ~((1 << 6) | (1 << 5));
 
@@ -129,7 +131,8 @@ public class Raycast : MonoBehaviour
 
             }
             Distances[i] = rayLength < _viewRange ? 1 / rayLength : 0;
-            Debug.DrawRay(pos, dir.normalized * rayLength, color);
+            if (toggleShowRays)
+                Debug.DrawRay(pos, dir.normalized * rayLength, color);
         }
     }
 }

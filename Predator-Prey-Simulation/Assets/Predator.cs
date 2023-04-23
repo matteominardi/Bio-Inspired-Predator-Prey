@@ -17,6 +17,8 @@ public class Predator : MonoBehaviour, ISelectable
     public double Speed { get; private set; }
     public int Generation { get; private set; }
     public float ReproductionFactor { get; private set; }
+    public Raycast Raycast { get; private set; }
+
     private float[] _inputs;
     private float[] _outputs;
 
@@ -42,7 +44,7 @@ public class Predator : MonoBehaviour, ISelectable
         // }
 
         if (parent == null)
-            brain = new NeuralNetwork(new[] { 48, 5, 3 });
+            brain = new NeuralNetwork(new[] { 48, 5, 2 });
         else
         {
             brain = parent;
@@ -60,8 +62,10 @@ public class Predator : MonoBehaviour, ISelectable
         gameObject.tag = "Predator";
 
 
+
         GetComponent<SpriteRenderer>().color = Color.red;
-        GetComponent<Raycast>().Generate(24, 90, 60, this);//, rotationAngle);
+        this.Raycast = GetComponent<Raycast>();
+        this.Raycast.Generate(24, 90, 60, this);//, rotationAngle);
 
     }
 

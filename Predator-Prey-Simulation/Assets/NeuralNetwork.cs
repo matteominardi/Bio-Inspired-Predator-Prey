@@ -10,6 +10,11 @@ public class NeuralNetwork
     private float[][][] _weights;    // array with the outgoing _weights between each layer , i.e. [[[layer1], [layer1], [layer1], [layer1], [layer1]], [[layer2], [layer2], [layer2], [layer2]], [[layer3], [layer3], [layer3]]
     private int[] _activations;
 
+    public float this[int i, int j, int k]
+    {
+        get { return _weights[i][j][k]; }
+    }
+
     public NeuralNetwork(int[] _layers)
     {
         this._layers = new int[_layers.Length];

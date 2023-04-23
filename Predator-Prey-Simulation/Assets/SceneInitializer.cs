@@ -1,6 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+using System.IO;
+using System.Linq;
 
 public class SceneInitializer : MonoBehaviour
 {
@@ -19,24 +22,45 @@ public class SceneInitializer : MonoBehaviour
         _time = Time.time;
         int NUMPREY = 3;
         int NUMPREDATOR = 3;
-        bool loadPretrained = false;
+        bool loadPretrained = true;
+
+
+
         NeuralNetwork netPrey = null;
         NeuralNetwork netPredator = null;
+        bool isNetPreyLoaded = false;
+        bool isNetPredatorLoaded = false;
 
         if (loadPretrained)
         {
-            netPrey = new NeuralNetwork(new[] { 48, 5, 3 });
-            netPredator = new NeuralNetwork(new[] { 48, 5, 3 });
-            netPrey.Load("./Assets/PreyBrain22-04-2023.txt"); //on start load the network save
-            netPredator.Load("./Assets/PredatorBrain22-04-2023.txt"); //on start load the network save
+            netPrey = new NeuralNetwork(new[] { 48, 5, 2 });
+            netPredator = new NeuralNetwork(new[] { 48, 5, 2 });
+            string[] paths = GetPathsOfMostRecentBrains(); // first element is prey, second is predator
+            if (paths[0] != null)
+            {
+                netPrey.Load(paths[0]); //on start load the network save
+                isNetPreyLoaded = true;
+                for (int i = 0; i < 48; i++)
+                {
+                    print("Prey: " + i + " " + netPrey[0,0,i]);
+                }
+            }
+            if (paths[1] != null)
+            {
+                netPrey.Load(paths[0]); //on start load the network save
+                isNetPredatorLoaded = true;
+
+            }
+            
+            
         }
 
 
         for (int i = 0; i < NUMPREY; i++)
         {
-            Prey prey = Instantiate<Prey>(preyPrefab, new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), 0), Quaternion.identity);
+            Prey prey = Instantiate<Prey>(preyPrefab, new Vector3(UnityEngine.Random.Range(-10, 10), UnityEngine.Random.Range(-10, 10), 0), Quaternion.identity);
             //Prey prey = Instantiate<Prey>(preyPrefab, new Vector3(0,0,0), Quaternion.identity);
-            if (loadPretrained)
+            if (loadPretrained && isNetPreyLoaded)
             {
                 prey.Generate(1, netPrey);
             }
@@ -49,8 +73,8 @@ public class SceneInitializer : MonoBehaviour
 
         for (int i = 0; i < NUMPREDATOR; i++)
         {
-            Predator predator = Instantiate<Predator>(predatorPrefab, new Vector3(Random.Range(-10, 10), Random.Range(-10, 10), 0), Quaternion.identity);
-            if (loadPretrained)
+            Predator predator = Instantiate<Predator>(predatorPrefab, new Vector3(UnityEngine.Random.Range(-10, 10), UnityEngine.Random.Range(-10, 10), 0), Quaternion.identity);
+            if (loadPretrained && isNetPredatorLoaded)
             {
                 predator.Generate(1, netPredator);
             }
@@ -60,6 +84,33 @@ public class SceneInitializer : MonoBehaviour
             }
         }
         Predator.Counter = NUMPREDATOR;
+    }
+
+    string[] GetPathsOfMostRecentBrains() 
+    {
+        string directoryPath = "./Assets/PretrainedNetworks";
+
+        string[] filesPredator = Directory.GetFiles(directoryPath, "PredatorBrain*.txt");
+        string[] filesPrey = Directory.GetFiles(directoryPath, "PreyBrain*.txt");
+        
+        string mostRecentPredatorFile = filesPredator
+            .OrderByDescending(f => DateTime.ParseExact(
+                Path.GetFileNameWithoutExtension(f).Substring("PredatorBrain".Length),
+                "dd-MM-yyyy",
+                null))
+            .FirstOrDefault();
+        
+        string mostRecentPreyFile = filesPrey
+            .OrderByDescending(f => DateTime.ParseExact(
+                Path.GetFileNameWithoutExtension(f).Substring("PreyBrain".Length),
+                "dd-MM-yyyy",
+                null))
+            .FirstOrDefault();
+
+        string[] paths = new string[2];
+        paths[0] = mostRecentPreyFile;
+        paths[1] = mostRecentPredatorFile;
+        return paths;
     }
 
     
