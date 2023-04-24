@@ -6,11 +6,11 @@ public class CameraController : MonoBehaviour
 {
     public float zoomSpeed = 2.0f;
     public float dragSpeed = 1.5f;
+    public GameObject Canvas;
 
     // Start is called before the first frame update
     void Start()
     {
-
     }
 
     // Update is called once per frame
@@ -18,6 +18,8 @@ public class CameraController : MonoBehaviour
     {
         float scrollWheel = Input.GetAxis("Mouse ScrollWheel");
         Camera.main.orthographicSize -= scrollWheel * zoomSpeed;
+        //Canvas.GetComponent<Canvas>().planeDistance += scrollWheel * zoomSpeed;
+
 
         if (Input.GetMouseButton(0))
         {

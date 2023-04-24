@@ -154,11 +154,12 @@ public class Prey : MonoBehaviour, ISelectable
             return;
         }
 
-        if (Energy < 10f && _energyExhausted)
+        if (Energy < 100f && _energyExhausted)
         {
             Energy += 5f * Time.deltaTime;
-            if (Energy >= 10f)
+            if (Energy >= 100f)
             {
+                Energy = 100f;
                 _energyExhausted = false;
                 GetComponent<SpriteRenderer>().color = new Color(0, 1, 0);
             }
@@ -198,19 +199,16 @@ public class Prey : MonoBehaviour, ISelectable
             //GetComponent<Raycast>().UpdateRays(0);
             GetComponent<Raycast>().UpdateRays();
         }
-        if (!(Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.DownArrow)))
-        {
-            if (Energy <= 100)
-                Energy = Mathf.Min(Energy + 5f * Time.deltaTime, 100);
-        }
-        else
-        {
-            Energy -= 10f * Time.deltaTime;
-        }
-    }
+        // if (!(Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.DownArrow)))
+        // {
+        //     if (Energy <= 100)
+        //         Energy = Mathf.Min(Energy + 5f * Time.deltaTime, 100);
+        // }
+        // else
+        // {
+        //     Energy -= 10f * Time.deltaTime;
+        // }
 
-    void LateUpdate()
-    {
         for (int i = 0; i < 24; i++)
         {
             _inputs[i * 2] = GetComponent<Raycast>().Distances[i];
@@ -224,12 +222,53 @@ public class Prey : MonoBehaviour, ISelectable
         float angularVelocity = _outputs[0];
         float linearVelocity = _outputs[1];
 
+        if (!(angularVelocity != 0f || linearVelocity != 0f || Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.DownArrow)))
+        {
+            if (Energy <= 100)
+                Energy = Mathf.Min(Energy + 5f * Time.deltaTime, 100);
+        }
+        else
+        {
+            Energy -= 10f * Time.deltaTime;
+        }
+
         transform.Translate(Vector2.up * Time.deltaTime * 2 * (int)Speed * linearVelocity);
         transform.Rotate(new Vector3(0, 0, angularVelocity) * Time.deltaTime * 90 * 2);
 
         GetComponent<Raycast>().UpdateRays();
-
     }
+
+    // void LateUpdate()
+    // {
+    //     for (int i = 0; i < 24; i++)
+    //     {
+    //         _inputs[i * 2] = GetComponent<Raycast>().Distances[i];
+    //     }
+    //     for (int i = 0; i < 24; i++)
+    //     {
+    //         _inputs[i * 2 + 1] = GetComponent<Raycast>().WhoIsThere[i];
+    //     }
+    //     _outputs = brain.FeedForward(_inputs);
+
+    //     float angularVelocity = _outputs[0];
+    //     float linearVelocity = _outputs[1];
+
+    //     if (!(angularVelocity != 0f || linearVelocity != 0f || Input.GetKey(KeyCode.UpArrow) || Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.DownArrow)))
+    //     {
+    //         if (Energy <= 100)
+    //             Energy = Mathf.Min(Energy + 5f * Time.deltaTime, 100);
+    //     }
+    //     else
+    //     {
+    //         Energy -= 10f * Time.deltaTime;
+    //     }
+
+    //     transform.Translate(Vector2.up * Time.deltaTime * 2 * (int)Speed * linearVelocity);
+    //     transform.Rotate(new Vector3(0, 0, angularVelocity) * Time.deltaTime * 90 * 2);
+
+    //     GetComponent<Raycast>().UpdateRays();
+
+    // }
 
     void OnCollisionStay2D(Collision2D collision)
     {
@@ -255,7 +294,7 @@ public class Prey : MonoBehaviour, ISelectable
             {
                 // lock (_lockPreys)
                 // {
-                    print("I am dead");
+                    //print("I am dead");
                     Alive = false;
                     //CanReproduce.DecrementPreysCounter();
                     Counter--;

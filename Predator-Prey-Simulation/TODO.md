@@ -6,9 +6,8 @@ Project Description
 
 ### Todo
 
+- [ ] Fix lines when zooming (graph and links of the NNs)  
 - [ ] Fix FPS  
-- [ ] Spawn randomly with map borders in sceneInitializer  
-- [ ] Ordering of links in the NNs  
 - [ ] Remove biases from input layer (not important)  
 - [ ] multi-run with adaptive speed/size  
 
@@ -17,6 +16,9 @@ Project Description
 
 ### Done ✓
 
+- [x] Ordering of links in the NNs  
+- [x] Spawn randomly with map borders in sceneInitializer  
+- [x] Fix autonomous movement of preys (late update doesn't check energy and other stuff)  
 - [x] Move around the map (zoom in/out with mouse wheel)  
 - [x] Fix Show raycasts in panel  
 - [x] Show NNs of a selected individual in order to observe the activations  
@@ -27,6 +29,6 @@ Project Description
 - [x] Make timer and graphs always visible modifying the canvas group alpha  
 - [x] Fix interaction when predators and preys collide (if they stay collided the predator won't eat it)  
 - [x] Make map size bigger  
-- [x] set correctly the max on the y axis on the plots 
-- [x] Move around the map (zoom in/out with mouse wheel) 
+- [x] set correctly the max on the y axis on the plots  
+- [x] Move around the map (zoom in/out with mouse wheel)  
 

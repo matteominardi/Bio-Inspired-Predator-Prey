@@ -11,6 +11,7 @@ public class SceneInitializer : MonoBehaviour
     public Predator predatorPrefab;
     private float _time;
     private static int[] _brainStructure = new[] {48, 5, 2};
+    public GameObject Background;
     
     public static int[] BrainStructure()
     {
@@ -28,12 +29,32 @@ public class SceneInitializer : MonoBehaviour
         _time = Time.time;
         int NUMPREY = 500;
         int NUMPREDATOR = 500;
-        int MAXPREYALLOWED = 1000;
-        int MAXPREDATORALLOWED = 1000;
+        int MAXPREYALLOWED = 500;
+        int MAXPREDATORALLOWED = 500;
         bool loadPretrained = false;
+        int mapSize = 40; // scale is 1:10 (1 unit here = 5 units in the world) (eg. mapSize = 40 => 200x200 world)
 
         Prey.MaxPrey = MAXPREYALLOWED;
         Predator.MaxPredator = MAXPREDATORALLOWED;
+
+        Background.transform.localScale = new Vector3(mapSize, 1, mapSize);
+        Background.GetComponent<Renderer>().material.mainTextureScale = new Vector2(mapSize, mapSize);
+
+        GameObject leftWall = GameObject.Find("leftWall");
+        GameObject rightWall = GameObject.Find("rightWall");
+        GameObject topWall = GameObject.Find("topWall");
+        GameObject bottomWall = GameObject.Find("bottomWall");
+
+        leftWall.transform.position = new Vector3(-mapSize*5-leftWall.transform.localScale.x/2, 0, 0);
+        rightWall.transform.position = new Vector3(mapSize*5+rightWall.transform.localScale.x/2, 0, 0);
+        topWall.transform.position = new Vector3(0, mapSize*5+topWall.transform.localScale.y/2, 0);
+        bottomWall.transform.position = new Vector3(0, -mapSize*5-bottomWall.transform.localScale.y/2, 0);
+
+        leftWall.transform.localScale = new Vector3(leftWall.transform.localScale.x, mapSize*10+20, 1);
+        rightWall.transform.localScale = new Vector3(rightWall.transform.localScale.x, mapSize*10+20, 1);
+        topWall.transform.localScale = new Vector3(mapSize*10+20, topWall.transform.localScale.y, 1);
+        bottomWall.transform.localScale = new Vector3(mapSize*10+20, bottomWall.transform.localScale.y, 1);
+
 
 
         NeuralNetwork netPrey = null;
@@ -68,7 +89,9 @@ public class SceneInitializer : MonoBehaviour
 
         for (int i = 0; i < NUMPREY; i++)
         {
-            Prey prey = Instantiate<Prey>(preyPrefab, new Vector3(UnityEngine.Random.Range(-30, 30), UnityEngine.Random.Range(-30, 30), 0), Quaternion.identity);
+            float randomRotationAngle = UnityEngine.Random.Range(0.0f, 360.0f);
+            Quaternion randomRotation = Quaternion.Euler(0.0f, 0.0f, randomRotationAngle);
+            Prey prey = Instantiate<Prey>(preyPrefab, new Vector3(UnityEngine.Random.Range(-mapSize*5+2, mapSize*5-2), UnityEngine.Random.Range(-mapSize*5+2, mapSize*5-2), 0), randomRotation);
             //Prey prey = Instantiate<Prey>(preyPrefab, new Vector3(0,0,0), Quaternion.identity);
             if (loadPretrained && isNetPreyLoaded)
             {
@@ -83,7 +106,9 @@ public class SceneInitializer : MonoBehaviour
 
         for (int i = 0; i < NUMPREDATOR; i++)
         {
-            Predator predator = Instantiate<Predator>(predatorPrefab, new Vector3(UnityEngine.Random.Range(-30, 30), UnityEngine.Random.Range(-30, 30), 0), Quaternion.identity);
+            float randomRotationAngle = UnityEngine.Random.Range(0.0f, 360.0f);
+            Quaternion randomRotation = Quaternion.Euler(0.0f, 0.0f, randomRotationAngle);
+            Predator predator = Instantiate<Predator>(predatorPrefab, new Vector3(UnityEngine.Random.Range(-mapSize*5+2, mapSize*5-2), UnityEngine.Random.Range(-mapSize*5+2, mapSize*5-2), 0), randomRotation);
             if (loadPretrained && isNetPredatorLoaded)
             {
                 predator.Generate(1, netPredator);

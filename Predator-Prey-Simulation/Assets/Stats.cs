@@ -8,8 +8,8 @@ using Vectrosity;
 public class Stats : MonoBehaviour
 {
     Camera mainCamera;
+    [SerializeField] public GameObject CanvasParent;
     public GameObject neuronPrefab;
-
     ISelectable selectedObject;
     TMPro.TextMeshProUGUI refTxtHealth;
     TMPro.TextMeshProUGUI refTxtFitness;
@@ -26,6 +26,8 @@ public class Stats : MonoBehaviour
     RectTransform panelBrainRect;
     GameObject[][] Neurons;
     VectorLine[][][] NeuronsLinks;
+
+    bool firstDraw = true;
 
 
     bool visible = false; 
@@ -53,9 +55,18 @@ public class Stats : MonoBehaviour
         //float[] neuronsActivationsDistances = obj.gameObject.GetComponent<Raycast>().Distances;
         //float[] neuronsActivationsWhoIsThere = obj.gameObject.GetComponent<Raycast>().WhoIsThere;
         
-        VectorLine.SetCanvasCamera(Camera.main);
-        VectorLine.canvas.sortingOrder = 2;
 
+
+
+
+
+        // ------------------ NEURAL NETWORK ------------------
+        //VectorLine.SetCanvasCamera(mainCamera);
+        //VectorLine.SetCanvas(GameObject.Find("Canvas"));
+        VectorLine.canvas.sortingOrder = 4;
+
+
+        // ------------------ NEURONS -----------------------
         int[] brainStructure = SceneInitializer.BrainStructure();
         Neurons = new GameObject[brainStructure.Length][];
         for (int i = 0; i < brainStructure.Length; i++)
@@ -63,6 +74,7 @@ public class Stats : MonoBehaviour
             Neurons[i] = new GameObject[brainStructure[i]];
         }
 
+        // ------------------ NEURONS LINKS ------------------
         NeuronsLinks = new VectorLine[brainStructure.Length-1][][];
         for (int i = 0; i < brainStructure.Length-1; i++)
         {
@@ -95,10 +107,11 @@ public class Stats : MonoBehaviour
                         Vector2 nextPos = new Vector2((float)(i+1)/(float)(brainStructure.Length - 1)* panelWidth+15f, -(float)k / (float)(brainStructure[i+1]-1) * panelHeight-15f);
                         Vector2 nextPosLine = panelBrainRect.TransformPoint(nextPos);
                         float widthLine = panelBrainRect.TransformPoint(new Vector2(1f, 1f))[0];
-                        NeuronsLinks[i][j][k] = new VectorLine("NeuronLink-"+i+"/"+j+"/"+k, new List<Vector2> { posLine, nextPosLine }, 0.06f, LineType.Continuous);
-                        NeuronsLinks[i][j][k].color = Color.white;
+                        NeuronsLinks[i][j][k] = new VectorLine("NeuronLink-"+i+"/"+j+"/"+k, new List<Vector2> { posLine, nextPosLine }, 0.06f, LineType.Discrete);
+                        //NeuronsLinks[i][j][k].color = Color.white;
                         NeuronsLinks[i][j][k].active = false;
-                        NeuronsLinks[i][j][k].Draw();
+                        NeuronsLinks[i][j][k].SetCanvas(CanvasParent);
+                        //NeuronsLinks[i][j][k].Draw();
                         //VectorLine.SetLine(Color.white, panelBrainRect.TransformPoint(pos), panelBrainRect.TransformPoint(nextPos));
                     }
                 }
@@ -228,6 +241,8 @@ public class Stats : MonoBehaviour
 
     void ShowBrain(ISelectable obj)
     {
+        if (obj.Alive == false)
+            return;
         int[] brainModel = obj.BrainModel;
         float panelWidth = panelBrain.GetComponent<RectTransform>().rect.width - 30;
         //print("panelWidth " + panelWidth);
@@ -273,14 +288,14 @@ public class Stats : MonoBehaviour
                             neuron.transform.Find("Activation").GetComponent<SpriteRenderer>().color = Color.grey;
                     }
                 }
-                if (i+1 < brainModel.Length)
+                if (firstDraw && i+1 < brainModel.Length)
                 {
                     for (int k = 0; k < brainModel[i + 1]; k++)
                     {
                         float value = obj.Brain[i,j,k]; // your value within the range from -inf to +inf
-                        value = Mathf.Clamp(value, -5, 5);
+                        value = Mathf.Clamp(value, -1, 1);
                         // //float zeroToOne = Mathf.InverseLerp(float.NegativeInfinity, float.PositiveInfinity, value);
-                        float zeroToOne = Mathf.InverseLerp(-5, 5, value);
+                        float zeroToOne = Mathf.InverseLerp(-1, 1, value);
                         Color color = Color.Lerp(Color.black, Color.white, zeroToOne);
                         VectorLine neuronLine = NeuronsLinks[i][j][k];
                         neuronLine.active = true;
@@ -289,30 +304,11 @@ public class Stats : MonoBehaviour
                         neuronLine.Draw();
                     }
                 }
-                
-
-                // loop over next layer to draw lines
-                // if (i+1 < brainModel.Length)
-                // {
-                //     for (int k = 0; k < brainModel[i+1]; k++)
-                //     {
-                //         float value = obj.Brain[i,j, k]; // your value within the range from -inf to +inf
-                //         float zeroToOne = Mathf.InverseLerp(float.NegativeInfinity, float.PositiveInfinity, value);
-                //         Color color = Color.Lerp(Color.black, Color.white, zeroToOne);
-                //         VectorLine neuronLine = NeuronsLinks[i][j][k];
-                //         neuronLine.active = true;
-                //         neuronLine.SetColor(Color.white);
-                //     }
-                // }
 
             }
-
-            
-            //print("x" + (float)i / (float)brainModel.Length * panelWidth + 15f + " y " + (float)i / (float)brainModel.Length * panelHeight + 15f);
-            //neuron.GetComponent<RectTransform>().anchoredPosition = new Vector2(brainModel[i] % 10 * panelWidth / 10, brainModel[i] / 10 * panelHeight / 10);
-            //neuron.GetComponent<RectTransform>().sizeDelta = new Vector2(panelWidth / 10, panelHeight / 10);
-            //neuron.GetComponent<Image>().color = Color.white;
         }
+        if (firstDraw)
+            firstDraw = false;
 
     }
 
@@ -325,7 +321,7 @@ public class Stats : MonoBehaviour
                 GameObject neuron = Neurons[i][j];
                 neuron.SetActive(false);
                 neuron.transform.Find("Activation").GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
-                neuron.transform.Find("Activation").GetComponent<SpriteRenderer>().color = Color.white;
+                //neuron.transform.Find("Activation").GetComponent<SpriteRenderer>().color = Color.white;
                 if (i+1 < Neurons.Length)
                 {
                     for (int k = 0; k < Neurons[i+1].Length; k++)
@@ -336,5 +332,6 @@ public class Stats : MonoBehaviour
                 }
             }
         }
+        firstDraw = true;
     }
 }

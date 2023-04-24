@@ -94,7 +94,7 @@ public class Predator : MonoBehaviour, ISelectable
 
         if (Energy <= 0)
         {
-            print("I am dead");
+            //print("I am dead");
             Alive = false;
             Fitness = -1;
             Counter--;
@@ -174,7 +174,7 @@ public class Predator : MonoBehaviour, ISelectable
 
             if (Lifepoints <= 0)
             {
-                print("I am dead");
+                //print("I am dead");
                 Alive = false;
                 Fitness = -1;
                 CanReproduce.DecrementPredatorsCounter();
