@@ -3,7 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public interface ISelectable
+public interface IComponent
+{
+    Transform transform {get;}
+    GameObject gameObject {get;}
+}
+
+public interface ISelectable : IComponent
 {
     int Lifepoints { get; }
     double Fitness { get; }
@@ -12,6 +18,8 @@ public interface ISelectable
     double Speed { get; }
     public int Generation { get; }
     public Raycast Raycast { get; }
+    public int[] BrainModel { get; }
+    public NeuralNetwork Brain { get; }
 
 }
 
@@ -21,6 +29,7 @@ public class Prey : MonoBehaviour, ISelectable
     public static int Counter = 0;
     private readonly object _lockPreys = new object();
     private  NeuralNetwork brain;
+    public NeuralNetwork Brain { get => brain; }
     // private Raycast[] inputs;
     public int Lifepoints { get; private set; }
     public double Fitness { get; private set; }
@@ -30,6 +39,8 @@ public class Prey : MonoBehaviour, ISelectable
     public double Speed { get; private set; }
     public int Generation { get; private set; }
     public Raycast Raycast { get; private set; }
+    public int[] BrainModel { get; private set; }
+
 
 
     private bool _energyExhausted;
@@ -67,8 +78,10 @@ public class Prey : MonoBehaviour, ISelectable
             //     return;
             // }
             //print("NUMBER OF PREYS " + CanReproduce.PreysCounter());
+            BrainModel = new int[] { 48, 5, 2 };
+
             if (parent == null)
-                brain = new NeuralNetwork(new[] { 48, 5, 2 });
+                brain = new NeuralNetwork(BrainModel);
             else
             {
                 brain = parent;
@@ -196,27 +209,27 @@ public class Prey : MonoBehaviour, ISelectable
         }
     }
 
-    // void LateUpdate()
-    // {
-    //     for (int i = 0; i < 24; i++)
-    //     {
-    //         _inputs[i * 2] = GetComponent<Raycast>().Distances[i];
-    //     }
-    //     for (int i = 0; i < 24; i++)
-    //     {
-    //         _inputs[i * 2 + 1] = GetComponent<Raycast>().WhoIsThere[i];
-    //     }
-    //     _outputs = brain.FeedForward(_inputs);
+    void LateUpdate()
+    {
+        for (int i = 0; i < 24; i++)
+        {
+            _inputs[i * 2] = GetComponent<Raycast>().Distances[i];
+        }
+        for (int i = 0; i < 24; i++)
+        {
+            _inputs[i * 2 + 1] = GetComponent<Raycast>().WhoIsThere[i];
+        }
+        _outputs = brain.FeedForward(_inputs);
 
-    //     float angularVelocity = _outputs[0];
-    //     float linearVelocity = _outputs[1];
+        float angularVelocity = _outputs[0];
+        float linearVelocity = _outputs[1];
 
-    //     transform.Translate(Vector2.up * Time.deltaTime * 2 * (int)Speed * linearVelocity);
-    //     transform.Rotate(new Vector3(0, 0, angularVelocity) * Time.deltaTime * 90 * 2);
+        transform.Translate(Vector2.up * Time.deltaTime * 2 * (int)Speed * linearVelocity);
+        transform.Rotate(new Vector3(0, 0, angularVelocity) * Time.deltaTime * 90 * 2);
 
-    //     GetComponent<Raycast>().UpdateRays();
+        GetComponent<Raycast>().UpdateRays();
 
-    // }
+    }
 
     void OnCollisionStay2D(Collision2D collision)
     {

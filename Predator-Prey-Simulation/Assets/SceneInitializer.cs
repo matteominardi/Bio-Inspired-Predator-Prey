@@ -10,6 +10,12 @@ public class SceneInitializer : MonoBehaviour
     public Prey preyPrefab;
     public Predator predatorPrefab;
     private float _time;
+    private static int[] _brainStructure = new[] {48, 5, 2};
+    
+    public static int[] BrainStructure()
+    {
+        return _brainStructure;
+    }
 
     // Start is called before the first frame update
     void Awake()
@@ -20,10 +26,14 @@ public class SceneInitializer : MonoBehaviour
         // Predator firstPredator = Instantiate<Predator>(predatorPrefab, new Vector3(4, 0, 0), Quaternion.identity);
         // firstPredator.Generate(1);
         _time = Time.time;
-        int NUMPREY = 3;
-        int NUMPREDATOR = 3;
-        bool loadPretrained = true;
+        int NUMPREY = 500;
+        int NUMPREDATOR = 500;
+        int MAXPREYALLOWED = 1000;
+        int MAXPREDATORALLOWED = 1000;
+        bool loadPretrained = false;
 
+        Prey.MaxPrey = MAXPREYALLOWED;
+        Predator.MaxPredator = MAXPREDATORALLOWED;
 
 
         NeuralNetwork netPrey = null;
@@ -33,17 +43,17 @@ public class SceneInitializer : MonoBehaviour
 
         if (loadPretrained)
         {
-            netPrey = new NeuralNetwork(new[] { 48, 5, 2 });
-            netPredator = new NeuralNetwork(new[] { 48, 5, 2 });
+            netPrey = new NeuralNetwork(BrainStructure());
+            netPredator = new NeuralNetwork(BrainStructure());
             string[] paths = GetPathsOfMostRecentBrains(); // first element is prey, second is predator
             if (paths[0] != null)
             {
                 netPrey.Load(paths[0]); //on start load the network save
                 isNetPreyLoaded = true;
-                for (int i = 0; i < 48; i++)
-                {
-                    print("Prey: " + i + " " + netPrey[0,0,i]);
-                }
+                // for (int i = 0; i < 48; i++)
+                // {
+                //     print("Prey: " + i + " " + netPrey[0,0,i]);
+                // }
             }
             if (paths[1] != null)
             {
@@ -58,7 +68,7 @@ public class SceneInitializer : MonoBehaviour
 
         for (int i = 0; i < NUMPREY; i++)
         {
-            Prey prey = Instantiate<Prey>(preyPrefab, new Vector3(UnityEngine.Random.Range(-10, 10), UnityEngine.Random.Range(-10, 10), 0), Quaternion.identity);
+            Prey prey = Instantiate<Prey>(preyPrefab, new Vector3(UnityEngine.Random.Range(-30, 30), UnityEngine.Random.Range(-30, 30), 0), Quaternion.identity);
             //Prey prey = Instantiate<Prey>(preyPrefab, new Vector3(0,0,0), Quaternion.identity);
             if (loadPretrained && isNetPreyLoaded)
             {
@@ -73,7 +83,7 @@ public class SceneInitializer : MonoBehaviour
 
         for (int i = 0; i < NUMPREDATOR; i++)
         {
-            Predator predator = Instantiate<Predator>(predatorPrefab, new Vector3(UnityEngine.Random.Range(-10, 10), UnityEngine.Random.Range(-10, 10), 0), Quaternion.identity);
+            Predator predator = Instantiate<Predator>(predatorPrefab, new Vector3(UnityEngine.Random.Range(-30, 30), UnityEngine.Random.Range(-30, 30), 0), Quaternion.identity);
             if (loadPretrained && isNetPredatorLoaded)
             {
                 predator.Generate(1, netPredator);

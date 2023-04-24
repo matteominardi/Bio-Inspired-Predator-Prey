@@ -10,7 +10,9 @@ public class Raycast : MonoBehaviour
     private Vector3[] _rays;
     private float[] _angles;
     private int _fov;
+    public int Fov { get { return _fov; } }
     private int _viewRange;
+    public int ViewRange { get { return _viewRange; } }
     public float[] Distances;
     public float[] WhoIsThere;
     public bool toggleShowRays;

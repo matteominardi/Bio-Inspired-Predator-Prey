@@ -6,17 +6,21 @@ Project Description
 
 ### Todo
 
-- [ ] Move around the map (zoom in/out with mouse wheel)  
-- [ ] Show NNs of a selected individual in order to observe the activations  
-- [ ] Make preys move with their NNs  
+- [ ] Fix FPS  
+- [ ] Spawn randomly with map borders in sceneInitializer  
+- [ ] Ordering of links in the NNs  
+- [ ] Remove biases from input layer (not important)  
 - [ ] multi-run with adaptive speed/size  
-- [ ] Fix Show raycasts in panel  
 
 ### In Progress
 
 
 ### Done ✓
 
+- [x] Move around the map (zoom in/out with mouse wheel)  
+- [x] Fix Show raycasts in panel  
+- [x] Show NNs of a selected individual in order to observe the activations  
+- [x] Make preys move with their NNs  
 - [x] Make timer panel resize when it grows  
 - [x] save and load NNs to rerun with "learned" NNs  
 - [x] fix cap on reproduction  

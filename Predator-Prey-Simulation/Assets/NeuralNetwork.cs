@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System;
 using System.IO;
+using UnityEngine;
 
 public class NeuralNetwork
 {
@@ -69,20 +70,47 @@ public class NeuralNetwork
     /*
     for each node, computes the number of incoming connections, and assigns a random value to each of them between -0.5 and 0.5
     */
+    // private void InitWeights()
+    // {
+    //     List<float[][]> WeightsList = new List<float[][]>();
+
+    //     for (int i = 0; i < _layers.Length; i++)
+    //     {
+    //         List<float[]> layerWeightsList = new List<float[]>();
+    //         int NeuronsInPreviousLayer = _layers[i - 1];
+            
+
+    //         for (int j = 0; j < _neurons[i].Length; j++)
+    //         {
+    //             float[] neuronWeights = new float[NeuronsInPreviousLayer];
+
+    //             for (int k = 0; k < NeuronsInPreviousLayer; k++)
+    //             {
+    //                 neuronWeights[k] = UnityEngine.Random.Range(-0.5f, 0.5f);
+    //             }
+
+    //             layerWeightsList.Add(neuronWeights);
+    //         }
+
+    //         WeightsList.Add(layerWeightsList.ToArray());
+    //     }
+
+    //     _weights = WeightsList.ToArray();
+    // }
     private void InitWeights()
     {
         List<float[][]> WeightsList = new List<float[][]>();
 
-        for (int i = 1; i < _layers.Length; i++)
+        for (int i = 0; i < _layers.Length - 1; i++)
         {
             List<float[]> layerWeightsList = new List<float[]>();
-            int NeuronsInPreviousLayer = _layers[i - 1];
+            int neuronsInNextLayer = _layers[i + 1];            
 
             for (int j = 0; j < _neurons[i].Length; j++)
             {
-                float[] neuronWeights = new float[NeuronsInPreviousLayer];
+                float[] neuronWeights = new float[neuronsInNextLayer];
 
-                for (int k = 0; k < NeuronsInPreviousLayer; k++)
+                for (int k = 0; k < neuronsInNextLayer; k++)
                 {
                     neuronWeights[k] = UnityEngine.Random.Range(-0.5f, 0.5f);
                 }
@@ -108,6 +136,31 @@ public class NeuralNetwork
     performs the weighted sum of the inputs and the _biases, and then applies the activation function to the result of each neuron in the network
     returns the output layer of the network
     */
+    // public float[] FeedForward(float[] inputs)
+    // {
+    //     for (int i = 0; i < inputs.Length; i++)
+    //     {
+    //         _neurons[0][i] = inputs[i];
+    //     }
+
+    //     for (int i = 1; i < _layers.Length; i++)
+    //     {
+    //         int layer = i - 1;
+
+    //         for (int j = 0; j < _neurons[i].Length; j++)
+    //         {
+    //             float value = 0f;
+
+    //             for (int k = 0; k < _neurons[i - 1].Length; k++)
+    //             {
+    //                 value += _weights[i - 1][j][k] * _neurons[i - 1][k];
+    //             }
+
+    //             _neurons[i][j] = Activate(value + _biases[i][j]);
+    //         }
+    //     }
+    //     return _neurons[_neurons.Length - 1];
+    // }
     public float[] FeedForward(float[] inputs)
     {
         for (int i = 0; i < inputs.Length; i++)
@@ -115,20 +168,18 @@ public class NeuralNetwork
             _neurons[0][i] = inputs[i];
         }
 
-        for (int i = 1; i < _layers.Length; i++)
+        for (int i = 0; i < _layers.Length - 1; i++)
         {
-            int layer = i - 1;
-
             for (int j = 0; j < _neurons[i].Length; j++)
             {
-                float value = 0f;
-
-                for (int k = 0; k < _neurons[i - 1].Length; k++)
+                for (int k = 0; k < _neurons[i + 1].Length; k++)
                 {
-                    value += _weights[i - 1][j][k] * _neurons[i - 1][k];
+                    _neurons[i + 1][k] += _weights[i][j][k] * _neurons[i][j];
                 }
-
-                _neurons[i][j] = Activate(value + _biases[i][j]);
+            }
+            for (int k = 0; k < _neurons[i + 1].Length; k++)
+            {
+                _neurons[i + 1][k] = Activate(_neurons[i + 1][k] + _biases[i + 1][k]);
             }
         }
         return _neurons[_neurons.Length - 1];
@@ -191,15 +242,25 @@ public class NeuralNetwork
     */
     public void Load(string path)
     {
-        TextReader tr = new StreamReader(path);
+        StreamReader tr = new StreamReader(path);
         int NumberOfLines = (int)new FileInfo(path).Length;
-        string[] ListLines = new string[NumberOfLines];
-        int index = 1;
-
-        for (int i = 1; i < NumberOfLines; i++)
+        List<string> ListLines = new List<string>();
+        int index = 0;
+        
+        
+        while (!tr.EndOfStream)
         {
-            ListLines[i] = tr.ReadLine();
+            ListLines.Add(tr.ReadLine());
         }
+        //string[] ArrayLines = ListLines.ToArray();
+        Debug.Log("Number of lines: " + ListLines.Count);
+        // for (int i = 0; i < NumberOfLines; i++)
+        // {
+            
+        //     ListLines[i] = tr.ReadLine();
+            
+        //     Debug.Log("LINE " + i + " :" + ListLines[i]);
+        // }
 
         tr.Close();
 
@@ -254,6 +315,7 @@ public class NeuralNetwork
                 }
             }
         }
+        writer.Write((char)26); // Append EOF character
         writer.Close();
     }
 }

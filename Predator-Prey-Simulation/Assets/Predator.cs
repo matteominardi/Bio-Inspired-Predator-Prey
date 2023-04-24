@@ -8,6 +8,8 @@ public class Predator : MonoBehaviour, ISelectable
     public static int MaxPredator = 32;
     public static int Counter = 0;
     private NeuralNetwork brain;
+    public NeuralNetwork Brain { get => brain; }
+
     // private Raycast[] inputs;
     public int Lifepoints { get; private set; }
     public double Fitness { get; private set; }
@@ -18,6 +20,7 @@ public class Predator : MonoBehaviour, ISelectable
     public int Generation { get; private set; }
     public float ReproductionFactor { get; private set; }
     public Raycast Raycast { get; private set; }
+    public int[] BrainModel { get; private set; }
 
     private float[] _inputs;
     private float[] _outputs;
@@ -42,9 +45,10 @@ public class Predator : MonoBehaviour, ISelectable
         //     Destroy(gameObject);
         //     return;
         // }
-
+        BrainModel = new int[] { 48, 5, 2 };
+        
         if (parent == null)
-            brain = new NeuralNetwork(new[] { 48, 5, 2 });
+            brain = new NeuralNetwork(BrainModel);
         else
         {
             brain = parent;

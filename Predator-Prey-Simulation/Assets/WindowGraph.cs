@@ -39,7 +39,11 @@ public class WindowGraph : MonoBehaviour
         canvas = gameObject.transform.parent.gameObject;
         _lineRendererPrey.transform.SetParent(transform.Find("PreyGraphContainer"), false);
         _lineRendererPredator.transform.SetParent(transform.Find("PredatorGraphContainer"), false);
-        float[] valueList = new float[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+        float[] valueList = new float[100];
+        for (int i = 0; i < 100; i++)
+        {
+            valueList[i] = 0;
+        }
         preyBuffer = new CircularBuffer<float>(valueList);
         predatorBuffer = new CircularBuffer<float>(valueList);
         timer = Time.time;
@@ -56,7 +60,7 @@ public class WindowGraph : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Time.time - timer > 1)
+        if (Time.time - timer > 0.3)
         {
             timer = Time.time;
             float numberOfPreys = GameObject.FindGameObjectsWithTag("Prey").Length;

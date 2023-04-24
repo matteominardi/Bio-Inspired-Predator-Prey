@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.EventSystems;
+using Vectrosity;
 
 public class Stats : MonoBehaviour
 {
     Camera mainCamera;
+    public GameObject neuronPrefab;
+
     ISelectable selectedObject;
     TMPro.TextMeshProUGUI refTxtHealth;
     TMPro.TextMeshProUGUI refTxtFitness;
@@ -19,7 +22,13 @@ public class Stats : MonoBehaviour
     [SerializeField] private LayerMask layerMask;
     GraphicRaycaster gr;
 
-    bool visible = false;
+    GameObject panelBrain;
+    RectTransform panelBrainRect;
+    GameObject[][] Neurons;
+    VectorLine[][][] NeuronsLinks;
+
+
+    bool visible = false; 
     // Start is called before the first frame update
     void Start() 
     {
@@ -34,6 +43,72 @@ public class Stats : MonoBehaviour
         layerMask = ~((1<<5));
 
         gr = GetComponent<GraphicRaycaster>();
+        panelBrain = gameObject.transform.Find("PanelBrain").gameObject;
+        panelBrainRect = panelBrain.GetComponent<RectTransform>();
+
+        //VectorManager. = Camera.main;
+        float panelWidth = panelBrain.GetComponent<RectTransform>().rect.width - 30;
+        //print("panelWidth " + panelWidth);
+        float panelHeight = panelBrain.GetComponent<RectTransform>().rect.height - 30;
+        //float[] neuronsActivationsDistances = obj.gameObject.GetComponent<Raycast>().Distances;
+        //float[] neuronsActivationsWhoIsThere = obj.gameObject.GetComponent<Raycast>().WhoIsThere;
+        
+        VectorLine.SetCanvasCamera(Camera.main);
+        VectorLine.canvas.sortingOrder = 2;
+
+        int[] brainStructure = SceneInitializer.BrainStructure();
+        Neurons = new GameObject[brainStructure.Length][];
+        for (int i = 0; i < brainStructure.Length; i++)
+        {
+            Neurons[i] = new GameObject[brainStructure[i]];
+        }
+
+        NeuronsLinks = new VectorLine[brainStructure.Length-1][][];
+        for (int i = 0; i < brainStructure.Length-1; i++)
+        {
+            NeuronsLinks[i] = new VectorLine[brainStructure[i]][];
+            for (int j = 0; j < brainStructure[i]; j++)
+            {
+                NeuronsLinks[i][j]= new VectorLine[brainStructure[i+1]];
+            }
+        }
+        // loop over layers
+        for (int i = 0; i < brainStructure.Length; i++)
+        {
+            // loop over neurons
+            for (int j = 0; j < brainStructure[i]; j++)
+            {
+                // draw neuron
+                GameObject neuron = Instantiate<GameObject>(neuronPrefab, panelBrain.transform);
+                Vector2 pos = new Vector2((float)i/(float)(brainStructure.Length - 1)* panelWidth+15f, -(float)j / (float)(brainStructure[i]-1) * panelHeight-15f);
+                neuron.GetComponent<RectTransform>().localPosition = pos;
+                neuron.SetActive(false);
+                Neurons[i][j] = neuron;
+                Vector2 posLine = panelBrainRect.TransformPoint(pos);
+                // set activation according to raycast input
+                
+                // loop over next layer to draw lines
+                if (i+1 < brainStructure.Length)
+                {
+                    for (int k = 0; k < brainStructure[i+1]; k++)
+                    {
+                        Vector2 nextPos = new Vector2((float)(i+1)/(float)(brainStructure.Length - 1)* panelWidth+15f, -(float)k / (float)(brainStructure[i+1]-1) * panelHeight-15f);
+                        Vector2 nextPosLine = panelBrainRect.TransformPoint(nextPos);
+                        float widthLine = panelBrainRect.TransformPoint(new Vector2(1f, 1f))[0];
+                        NeuronsLinks[i][j][k] = new VectorLine("NeuronLink-"+i+"/"+j+"/"+k, new List<Vector2> { posLine, nextPosLine }, 0.06f, LineType.Continuous);
+                        NeuronsLinks[i][j][k].color = Color.white;
+                        NeuronsLinks[i][j][k].active = false;
+                        NeuronsLinks[i][j][k].Draw();
+                        //VectorLine.SetLine(Color.white, panelBrainRect.TransformPoint(pos), panelBrainRect.TransformPoint(nextPos));
+                    }
+                }
+
+            }
+            //print("x" + (float)i / (float)brainModel.Length * panelWidth + 15f + " y " + (float)i / (float)brainModel.Length * panelHeight + 15f);
+            //neuron.GetComponent<RectTransform>().anchoredPosition = new Vector2(brainModel[i] % 10 * panelWidth / 10, brainModel[i] / 10 * panelHeight / 10);
+            //neuron.GetComponent<RectTransform>().sizeDelta = new Vector2(panelWidth / 10, panelHeight / 10);
+            //neuron.GetComponent<Image>().color = Color.white;
+        }
 
         transform.GetComponent<CanvasGroup>().alpha = 0;
     }
@@ -41,9 +116,6 @@ public class Stats : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!toggleButton.isOn) {
-            //print("toggle off");
-        }
         if (Input.GetMouseButtonDown(0))
         {
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
@@ -89,6 +161,8 @@ public class Stats : MonoBehaviour
                     toggleButton.isOn = obj.Raycast.toggleShowRays;
 
                     mainCamera.GetComponent<MyCamera>().target = hit.collider.gameObject;
+
+                    ShowBrain(obj);
                     return;
 
                     //GetComponent<TMPro.TextMeshProUGUI>().text = health;
@@ -126,6 +200,7 @@ public class Stats : MonoBehaviour
                     mainCamera.GetComponent<MyCamera>().Reset();
                     visible = false;
                     transform.GetComponent<CanvasGroup>().alpha = 0;
+                    HideBrain(selectedObject);
                 }
                 return;
             }
@@ -147,6 +222,119 @@ public class Stats : MonoBehaviour
             refTxtEnergy.text = energy;
             refTxtSpeed.text = speed;
             refTxtAlive.text = alive;
+            ShowBrain(selectedObject);
+        }
+    }
+
+    void ShowBrain(ISelectable obj)
+    {
+        int[] brainModel = obj.BrainModel;
+        float panelWidth = panelBrain.GetComponent<RectTransform>().rect.width - 30;
+        //print("panelWidth " + panelWidth);
+        float panelHeight = panelBrain.GetComponent<RectTransform>().rect.height - 30;
+        float[] neuronsActivationsDistances = obj.gameObject.GetComponent<Raycast>().Distances;
+        float[] neuronsActivationsWhoIsThere = obj.gameObject.GetComponent<Raycast>().WhoIsThere;
+        //print("neuronsActivations " + neuronsActivations.Length);
+
+        // loop over layers
+        for (int i = 0; i < brainModel.Length; i++)
+        {
+            // loop over neurons
+            for (int j = 0; j < brainModel[i]; j++)
+            {
+                GameObject neuron = Neurons[i][j];
+                neuron.SetActive(true);
+                // set activation according to raycast input
+                if (i == 0)
+                {
+                    if (j % 2 == 0)
+                    {
+                        float activation = neuronsActivationsDistances[j/2] != 0f ? 1f/neuronsActivationsDistances[j/2] : 0f;
+                        float ViewRange = obj.gameObject.GetComponent<Raycast>().ViewRange;
+                        float activationNormalized = (activation / ViewRange);
+                        //print("activationNormalized " + activationNormalized + " activation " + activation + " ViewRange " + ViewRange + " neuronsActivationsDistances[j/2] " + neuronsActivationsDistances[j/2]);
+                        if (activation != 0f)
+                        {
+
+                            neuron.transform.Find("Activation").GetComponent<RectTransform>().localScale = new Vector3(activationNormalized, activationNormalized, 1);
+                        }
+                        else 
+                            neuron.transform.Find("Activation").GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
+
+                    }
+                    else 
+                    {
+                        //print("j "+ j/2);
+                        float activation = Mathf.Abs(neuronsActivationsWhoIsThere[j/2]) == 1f ? 1f : 0f;
+                        neuron.transform.Find("Activation").GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
+                        if (activation == 1f)
+                            neuron.transform.Find("Activation").GetComponent<SpriteRenderer>().color = neuronsActivationsWhoIsThere[j/2] == 1 ? Color.green : Color.red;
+                        else 
+                            neuron.transform.Find("Activation").GetComponent<SpriteRenderer>().color = Color.grey;
+                    }
+                }
+                if (i+1 < brainModel.Length)
+                {
+                    for (int k = 0; k < brainModel[i + 1]; k++)
+                    {
+                        float value = obj.Brain[i,j,k]; // your value within the range from -inf to +inf
+                        value = Mathf.Clamp(value, -5, 5);
+                        // //float zeroToOne = Mathf.InverseLerp(float.NegativeInfinity, float.PositiveInfinity, value);
+                        float zeroToOne = Mathf.InverseLerp(-5, 5, value);
+                        Color color = Color.Lerp(Color.black, Color.white, zeroToOne);
+                        VectorLine neuronLine = NeuronsLinks[i][j][k];
+                        neuronLine.active = true;
+                        neuronLine.SetColor(color);
+                        //print("Line " + i + " " + j + " " + k + " " + neuronLine.GetColor(0));
+                        neuronLine.Draw();
+                    }
+                }
+                
+
+                // loop over next layer to draw lines
+                // if (i+1 < brainModel.Length)
+                // {
+                //     for (int k = 0; k < brainModel[i+1]; k++)
+                //     {
+                //         float value = obj.Brain[i,j, k]; // your value within the range from -inf to +inf
+                //         float zeroToOne = Mathf.InverseLerp(float.NegativeInfinity, float.PositiveInfinity, value);
+                //         Color color = Color.Lerp(Color.black, Color.white, zeroToOne);
+                //         VectorLine neuronLine = NeuronsLinks[i][j][k];
+                //         neuronLine.active = true;
+                //         neuronLine.SetColor(Color.white);
+                //     }
+                // }
+
+            }
+
+            
+            //print("x" + (float)i / (float)brainModel.Length * panelWidth + 15f + " y " + (float)i / (float)brainModel.Length * panelHeight + 15f);
+            //neuron.GetComponent<RectTransform>().anchoredPosition = new Vector2(brainModel[i] % 10 * panelWidth / 10, brainModel[i] / 10 * panelHeight / 10);
+            //neuron.GetComponent<RectTransform>().sizeDelta = new Vector2(panelWidth / 10, panelHeight / 10);
+            //neuron.GetComponent<Image>().color = Color.white;
+        }
+
+    }
+
+    void HideBrain(ISelectable obj)
+    {
+        for (int i = 0; i < Neurons.Length; i++)
+        {
+            for (int j = 0; j < Neurons[i].Length; j++)
+            {
+                GameObject neuron = Neurons[i][j];
+                neuron.SetActive(false);
+                neuron.transform.Find("Activation").GetComponent<RectTransform>().localScale = new Vector3(1, 1, 1);
+                neuron.transform.Find("Activation").GetComponent<SpriteRenderer>().color = Color.white;
+                if (i+1 < Neurons.Length)
+                {
+                    for (int k = 0; k < Neurons[i+1].Length; k++)
+                    {
+                        VectorLine neuronLine = NeuronsLinks[i][j][k];
+                        neuronLine.active = false;
+                    }
+                }
+            }
         }
     }
 }
