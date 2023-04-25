@@ -29,10 +29,10 @@ public class WindowGraph : MonoBehaviour
         _lineRendererPredator.useWorldSpace = false;
         // _lineRenderer.startColor = new Color(1,1,1,0f);
         // _lineRenderer.endColor = new Color(1,1,1,0f);
-        _lineRendererPrey.startWidth = 0.1f;
-        _lineRendererPrey.endWidth = 0.1f;
-        _lineRendererPredator.startWidth = 0.1f;
-        _lineRendererPredator.endWidth = 0.1f;
+        _lineRendererPrey.startWidth = 0.03f;
+        _lineRendererPrey.endWidth = 0.03f;
+        _lineRendererPredator.startWidth = 0.03f;
+        _lineRendererPredator.endWidth = 0.03f;
         //_lineRenderer.material.color = new Color(1,1,1,0f);
         //_lineRenderer.loop = true;
         //_lineRenderer.GetComponent<Renderer>().material.SetColor("_TintColor", new Color(1, 1, 1, 0.0f));
@@ -123,7 +123,7 @@ public class WindowGraph : MonoBehaviour
     private void ShowGraph(float[] valueList, RectTransform graphContainer, LineRenderer lineRenderer, bool prey)
     {
         float xSize = graphContainer.sizeDelta.x / (valueList.Length + 1);
-        float yMax = prey == true ? Prey.MaxPrey + 5 : Predator.MaxPredator + 5;
+        float yMax = prey == true ? Prey.MaxPrey * 1.1f : Predator.MaxPredator * 1.1f;
         float graphHeight = graphContainer.sizeDelta.y;
 
         //GameObject lastDot = null;

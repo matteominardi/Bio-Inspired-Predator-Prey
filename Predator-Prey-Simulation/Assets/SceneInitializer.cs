@@ -17,6 +17,13 @@ public class SceneInitializer : MonoBehaviour
     {
         return _brainStructure;
     }
+    
+    public static int NUMPREY = 100;
+    public static int NUMPREDATOR = 100;
+    public static int MAXPREYALLOWED = 500;
+    public static int MAXPREDATORALLOWED = 500;
+    public static bool loadPretrained = false;
+    public static int mapSize = 40; // scale is 1:10 (1 unit here = 5 units in the world) (eg. mapSize = 40 => 200x200 world)
 
     // Start is called before the first frame update
     void Awake()
@@ -27,12 +34,6 @@ public class SceneInitializer : MonoBehaviour
         // Predator firstPredator = Instantiate<Predator>(predatorPrefab, new Vector3(4, 0, 0), Quaternion.identity);
         // firstPredator.Generate(1);
         _time = Time.time;
-        int NUMPREY = 500;
-        int NUMPREDATOR = 500;
-        int MAXPREYALLOWED = 500;
-        int MAXPREDATORALLOWED = 500;
-        bool loadPretrained = false;
-        int mapSize = 40; // scale is 1:10 (1 unit here = 5 units in the world) (eg. mapSize = 40 => 200x200 world)
 
         Prey.MaxPrey = MAXPREYALLOWED;
         Predator.MaxPredator = MAXPREDATORALLOWED;

@@ -6,7 +6,7 @@ Project Description
 
 ### Todo
 
-- [ ] Fix lines when zooming (graph and links of the NNs)  
+- [ ] Add a starting scene to set up the parameters (eg. num of preys, map size...) before the simulation starts  
 - [ ] Fix FPS  
 - [ ] Remove biases from input layer (not important)  
 - [ ] multi-run with adaptive speed/size  
@@ -16,6 +16,7 @@ Project Description
 
 ### Done ✓
 
+- [x] Fix lines when zooming (graph and links of the NNs)  
 - [x] Ordering of links in the NNs  
 - [x] Spawn randomly with map borders in sceneInitializer  
 - [x] Fix autonomous movement of preys (late update doesn't check energy and other stuff)  

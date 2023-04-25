@@ -42,7 +42,7 @@ public class Stats : MonoBehaviour
         refTxtAlive = gameObject.transform.Find("lblAlive").transform.Find("txtAlive").GetComponent<TMPro.TextMeshProUGUI>();
         refTxtGeneration = gameObject.transform.Find("lblGeneration").transform.Find("txtGeneration").GetComponent<TMPro.TextMeshProUGUI>();
         toggleButton = gameObject.transform.Find("Toggle").GetComponent<Toggle>();
-        layerMask = ~((1<<5));
+        layerMask = ~((1<<5) | (1<<6));
 
         gr = GetComponent<GraphicRaycaster>();
         panelBrain = gameObject.transform.Find("PanelBrain").gameObject;
@@ -66,7 +66,7 @@ public class Stats : MonoBehaviour
         VectorLine.canvas.sortingOrder = 4;
 
 
-        // ------------------ NEURONS -----------------------
+        //------------------ NEURONS -----------------------
         int[] brainStructure = SceneInitializer.BrainStructure();
         Neurons = new GameObject[brainStructure.Length][];
         for (int i = 0; i < brainStructure.Length; i++)
@@ -107,10 +107,13 @@ public class Stats : MonoBehaviour
                         Vector2 nextPos = new Vector2((float)(i+1)/(float)(brainStructure.Length - 1)* panelWidth+15f, -(float)k / (float)(brainStructure[i+1]-1) * panelHeight-15f);
                         Vector2 nextPosLine = panelBrainRect.TransformPoint(nextPos);
                         float widthLine = panelBrainRect.TransformPoint(new Vector2(1f, 1f))[0];
-                        NeuronsLinks[i][j][k] = new VectorLine("NeuronLink-"+i+"/"+j+"/"+k, new List<Vector2> { posLine, nextPosLine }, 0.06f, LineType.Discrete);
+                        NeuronsLinks[i][j][k] = new VectorLine("NeuronLink-"+i+"/"+j+"/"+k, new List<Vector2> { posLine, nextPosLine }, 0.02f, LineType.Discrete);
                         //NeuronsLinks[i][j][k].color = Color.white;
+                        float x = NeuronsLinks[i][j][k].rectTransform.localPosition.x;
+                        float y = NeuronsLinks[i][j][k].rectTransform.localPosition.y;
                         NeuronsLinks[i][j][k].active = false;
                         NeuronsLinks[i][j][k].SetCanvas(CanvasParent);
+                        NeuronsLinks[i][j][k].rectTransform.localPosition = new Vector3(x, y, 0f);
                         //NeuronsLinks[i][j][k].Draw();
                         //VectorLine.SetLine(Color.white, panelBrainRect.TransformPoint(pos), panelBrainRect.TransformPoint(nextPos));
                     }
@@ -133,9 +136,10 @@ public class Stats : MonoBehaviour
         {
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
 
-            RaycastHit2D hit = Physics2D.GetRayIntersection(ray);
+            RaycastHit2D hit = Physics2D.GetRayIntersection(ray, Mathf.Infinity, layerMask);
             if (hit.collider != null)
             {
+                print("collided with " + hit.collider.gameObject.name);
                 if ((hit.transform.tag == "SelectableObject" || hit.transform.tag == "Predator" || hit.transform.tag == "Prey"))
                 {
                     //print("clicked on " + hit.collider.gameObject.name);
@@ -173,7 +177,7 @@ public class Stats : MonoBehaviour
                     refTxtGeneration.text = generation;
                     toggleButton.isOn = obj.Raycast.toggleShowRays;
 
-                    mainCamera.GetComponent<MyCamera>().target = hit.collider.gameObject;
+                    mainCamera.GetComponent<CameraController>().target = hit.collider.gameObject;
 
                     ShowBrain(obj);
                     return;
@@ -191,30 +195,47 @@ public class Stats : MonoBehaviour
             }
             else 
             {
-                List<RaycastResult> results = new List<RaycastResult>();
-                PointerEventData ped = new PointerEventData(EventSystem.current);
-                ped.position = Input.mousePosition;
-                gr.Raycast(ped, results);
-                if (results.Count > 0)
+                if (selectedObject != null)
                 {
-                    //print("INSIDE clicked on UI " + results[0].gameObject.name);
-                    if (results[0].gameObject.name == "Checkmark" && selectedObject != null)
-                        selectedObject.Raycast.toggleShowRays = !selectedObject.Raycast.toggleShowRays;
+                    List<RaycastResult> results = new List<RaycastResult>();
+                    PointerEventData ped = new PointerEventData(EventSystem.current);
+                    ped.position = Input.mousePosition; 
+                    gr.Raycast(ped, results);
+                    //EventSystem.current.RaycastAll(ped, results);
+                    if (results.Count > 0)
+                    {
+                        //print("---- " + results.Count);
+                        foreach(RaycastResult result in results)
+                        {
+                            //print("clicked on UI " + result.gameObject.name);
+                            if (result.gameObject.name == "Checkmark" || result.gameObject.name == "BackgroundCheckmark" || result.gameObject.name == "Toggle")
+                            {
+                                selectedObject.Raycast.toggleShowRays = !selectedObject.Raycast.toggleShowRays;
+                                return;
+                            }
+                        }
+                        //print("INSIDE clicked on UI " + results[0].gameObject.name);
+                        
+                    }
+                    else 
+                    {
+                        print("clicked on something that is not UI");
+                        selectedObject = null;
+                        refTxtHealth.text = "";
+                        refTxtFitness.text = "";
+                        refTxtEnergy.text = "";
+                        refTxtSpeed.text = "";
+                        refTxtAlive.text = "";
+                        refTxtGeneration.text = "";
+                        toggleButton.isOn = false;
+                        mainCamera.GetComponent<CameraController>().Reset(true);
+                        visible = false;
+                        transform.GetComponent<CanvasGroup>().alpha = 0;
+                        HideBrain(selectedObject);
+                    }
+
                 }
-                else if (selectedObject != null) {
-                    selectedObject = null;
-                    refTxtHealth.text = "";
-                    refTxtFitness.text = "";
-                    refTxtEnergy.text = "";
-                    refTxtSpeed.text = "";
-                    refTxtAlive.text = "";
-                    refTxtGeneration.text = "";
-                    toggleButton.isOn = false;
-                    mainCamera.GetComponent<MyCamera>().Reset();
-                    visible = false;
-                    transform.GetComponent<CanvasGroup>().alpha = 0;
-                    HideBrain(selectedObject);
-                }
+                
                 return;
             }
 
