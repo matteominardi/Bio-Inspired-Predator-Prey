@@ -10,14 +10,9 @@ public class SceneInitializer : MonoBehaviour
     public Prey preyPrefab;
     public Predator predatorPrefab;
     private float _time;
-    private static int[] _brainStructure = new[] {48, 5, 2};
+    private static int[] _brainStructure = new[] { 48, 5, 2 };
     public GameObject Background;
-    
-    public static int[] BrainStructure()
-    {
-        return _brainStructure;
-    }
-    
+
     public static int NUMPREY = 100;
     public static int NUMPREDATOR = 100;
     public static int MAXPREYALLOWED = 500;
@@ -46,15 +41,15 @@ public class SceneInitializer : MonoBehaviour
         GameObject topWall = GameObject.Find("topWall");
         GameObject bottomWall = GameObject.Find("bottomWall");
 
-        leftWall.transform.position = new Vector3(-mapSize*5-leftWall.transform.localScale.x/2, 0, 0);
-        rightWall.transform.position = new Vector3(mapSize*5+rightWall.transform.localScale.x/2, 0, 0);
-        topWall.transform.position = new Vector3(0, mapSize*5+topWall.transform.localScale.y/2, 0);
-        bottomWall.transform.position = new Vector3(0, -mapSize*5-bottomWall.transform.localScale.y/2, 0);
+        leftWall.transform.position = new Vector3(-mapSize * 5 - leftWall.transform.localScale.x / 2, 0, 0);
+        rightWall.transform.position = new Vector3(mapSize * 5 + rightWall.transform.localScale.x / 2, 0, 0);
+        topWall.transform.position = new Vector3(0, mapSize * 5 + topWall.transform.localScale.y / 2, 0);
+        bottomWall.transform.position = new Vector3(0, -mapSize * 5 - bottomWall.transform.localScale.y / 2, 0);
 
-        leftWall.transform.localScale = new Vector3(leftWall.transform.localScale.x, mapSize*10+20, 1);
-        rightWall.transform.localScale = new Vector3(rightWall.transform.localScale.x, mapSize*10+20, 1);
-        topWall.transform.localScale = new Vector3(mapSize*10+20, topWall.transform.localScale.y, 1);
-        bottomWall.transform.localScale = new Vector3(mapSize*10+20, bottomWall.transform.localScale.y, 1);
+        leftWall.transform.localScale = new Vector3(leftWall.transform.localScale.x, mapSize * 10 + 20, 1);
+        rightWall.transform.localScale = new Vector3(rightWall.transform.localScale.x, mapSize * 10 + 20, 1);
+        topWall.transform.localScale = new Vector3(mapSize * 10 + 20, topWall.transform.localScale.y, 1);
+        bottomWall.transform.localScale = new Vector3(mapSize * 10 + 20, bottomWall.transform.localScale.y, 1);
 
 
 
@@ -83,8 +78,8 @@ public class SceneInitializer : MonoBehaviour
                 isNetPredatorLoaded = true;
 
             }
-            
-            
+
+
         }
 
 
@@ -92,7 +87,7 @@ public class SceneInitializer : MonoBehaviour
         {
             float randomRotationAngle = UnityEngine.Random.Range(0.0f, 360.0f);
             Quaternion randomRotation = Quaternion.Euler(0.0f, 0.0f, randomRotationAngle);
-            Prey prey = Instantiate<Prey>(preyPrefab, new Vector3(UnityEngine.Random.Range(-mapSize*5+2, mapSize*5-2), UnityEngine.Random.Range(-mapSize*5+2, mapSize*5-2), 0), randomRotation);
+            Prey prey = Instantiate<Prey>(preyPrefab, new Vector3(UnityEngine.Random.Range(-mapSize * 5 + 2, mapSize * 5 - 2), UnityEngine.Random.Range(-mapSize * 5 + 2, mapSize * 5 - 2), 0), randomRotation);
             //Prey prey = Instantiate<Prey>(preyPrefab, new Vector3(0,0,0), Quaternion.identity);
             if (loadPretrained && isNetPreyLoaded)
             {
@@ -109,7 +104,7 @@ public class SceneInitializer : MonoBehaviour
         {
             float randomRotationAngle = UnityEngine.Random.Range(0.0f, 360.0f);
             Quaternion randomRotation = Quaternion.Euler(0.0f, 0.0f, randomRotationAngle);
-            Predator predator = Instantiate<Predator>(predatorPrefab, new Vector3(UnityEngine.Random.Range(-mapSize*5+2, mapSize*5-2), UnityEngine.Random.Range(-mapSize*5+2, mapSize*5-2), 0), randomRotation);
+            Predator predator = Instantiate<Predator>(predatorPrefab, new Vector3(UnityEngine.Random.Range(-mapSize * 5 + 2, mapSize * 5 - 2), UnityEngine.Random.Range(-mapSize * 5 + 2, mapSize * 5 - 2), 0), randomRotation);
             if (loadPretrained && isNetPredatorLoaded)
             {
                 predator.Generate(1, netPredator);
@@ -122,20 +117,20 @@ public class SceneInitializer : MonoBehaviour
         Predator.Counter = NUMPREDATOR;
     }
 
-    string[] GetPathsOfMostRecentBrains() 
+    string[] GetPathsOfMostRecentBrains()
     {
         string directoryPath = "./Assets/PretrainedNetworks";
 
         string[] filesPredator = Directory.GetFiles(directoryPath, "PredatorBrain*.txt");
         string[] filesPrey = Directory.GetFiles(directoryPath, "PreyBrain*.txt");
-        
+
         string mostRecentPredatorFile = filesPredator
             .OrderByDescending(f => DateTime.ParseExact(
                 Path.GetFileNameWithoutExtension(f).Substring("PredatorBrain".Length),
                 "dd-MM-yyyy",
                 null))
             .FirstOrDefault();
-        
+
         string mostRecentPreyFile = filesPrey
             .OrderByDescending(f => DateTime.ParseExact(
                 Path.GetFileNameWithoutExtension(f).Substring("PreyBrain".Length),
@@ -149,7 +144,7 @@ public class SceneInitializer : MonoBehaviour
         return paths;
     }
 
-    
+
 
     // Update is called once per frame
     // void Update()
@@ -180,37 +175,45 @@ public class SceneInitializer : MonoBehaviour
     //     } 
     // }
 
-    void Update() 
+    void Update()
     {
-        if (Time.time - _time > 10) {
+        if (Time.time - _time > 10)
+        {
             _time = Time.time;
             GameObject[] preys = GameObject.FindGameObjectsWithTag("Prey");
             GameObject[] predators = GameObject.FindGameObjectsWithTag("Predator");
 
-            if (preys.Length > 0) 
+            if (preys.Length > 0)
             {
                 GameObject bestPrey = preys[0];
-                foreach (GameObject prey in preys) 
+                foreach (GameObject prey in preys)
                 {
-                    if (prey.GetComponent<Prey>().Fitness > bestPrey.GetComponent<Prey>().Fitness) {
+                    if (prey.GetComponent<Prey>().Fitness > bestPrey.GetComponent<Prey>().Fitness)
+                    {
                         bestPrey = prey;
                     }
                 }
                 bestPrey.GetComponent<Prey>().SaveMyBrain();
             }
-            
 
-            if (predators.Length > 0) 
+
+            if (predators.Length > 0)
             {
                 GameObject bestPredator = predators[0];
-                foreach (GameObject predator in predators) 
+                foreach (GameObject predator in predators)
                 {
-                    if (predator.GetComponent<Predator>().Fitness > bestPredator.GetComponent<Predator>().Fitness) {
+                    if (predator.GetComponent<Predator>().Fitness > bestPredator.GetComponent<Predator>().Fitness)
+                    {
                         bestPredator = predator;
                     }
                 }
                 bestPredator.GetComponent<Predator>().SaveMyBrain();
             }
         }
+    }
+
+    public static int[] BrainStructure()
+    {
+        return _brainStructure;
     }
 }
