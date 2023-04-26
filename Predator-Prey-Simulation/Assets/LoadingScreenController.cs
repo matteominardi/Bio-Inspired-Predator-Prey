@@ -6,10 +6,10 @@ using System;
 
 public class LoadingScreenController : MonoBehaviour
 {
-    public Slider progressBar;
+    public GameObject progressBar;
 
     public void UpdateProgress(float progress)
     {
-        progressBar.value = progress;
+        progressBar.GetComponent<Slider>().value = progress;
     }
 }

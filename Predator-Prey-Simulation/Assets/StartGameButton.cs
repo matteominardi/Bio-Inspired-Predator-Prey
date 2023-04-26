@@ -26,6 +26,7 @@ public class StartGameButton : MonoBehaviour
 
     public void OnClick()
     {
+        menuController.GetComponent<MenuController>().ConfirmChanges();
         StartCoroutine(LoadGameSceneAsync());
     }
 
@@ -34,22 +35,46 @@ public class StartGameButton : MonoBehaviour
         // Show loading screen
         loadingScreen.gameObject.SetActive(true);
 
+        yield return new WaitForSeconds(0.2f);
+
+        loadingScreen.GetComponent<LoadingScreenController>().UpdateProgress(0.2f);
+
+        yield return new WaitForSeconds(0.5f);
+
+        loadingScreen.GetComponent<LoadingScreenController>().UpdateProgress(0.5f);
+
+        yield return new WaitForSeconds(1f);
+
+        loadingScreen.GetComponent<LoadingScreenController>().UpdateProgress(0.8f);
+
+        yield return new WaitForSeconds(0.5f);
         // Load game scene asynchronously
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(gameSceneName, LoadSceneMode.Single);
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("GameScene");
+
+
+        // float fakeProgress = 0f;
+        // // Wait until the scene is loaded
+        // while (fakeProgress <= 100f)
+        // {
+        //     fakeProgress += 1f;
+        //     loadingScreen.GetComponent<LoadingScreenController>().UpdateProgress(fakeProgress/100f);
+        //     yield return new WaitForSeconds(10f);
+        // }
 
         // Wait until the scene is loaded
         while (!asyncLoad.isDone)
         {
             float progress = Mathf.Clamp01(asyncLoad.progress / 0.9f);
             loadingScreen.GetComponent<LoadingScreenController>().UpdateProgress(progress);
-            yield return null;
+            
+            yield return new WaitForSecondsRealtime(1f);
         }
 
         // Hide loading screen
         loadingScreen.gameObject.SetActive(false);
         SceneManager.UnloadSceneAsync(gameObject.scene);
         //SceneManager.LoadScene(gameSceneName, LoadSceneMode.Single);
-        menuController.GetComponent<MenuController>().ConfirmChanges();
+        
 
     }
 }
