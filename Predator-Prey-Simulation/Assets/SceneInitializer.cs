@@ -10,7 +10,8 @@ public class SceneInitializer : MonoBehaviour
     public Prey preyPrefab;
     public Predator predatorPrefab;
     private float _time;
-    private static int[] _brainStructure = new[] { 48, 5, 2 };
+    private static int[] _brainStructurePreys = new[] { 48, 5, 2 };
+    private static int[] _brainStructurePredators = new[] { 48, 5, 2 };
     public GameObject Background;
 
     public static int NUMPREY = 100;
@@ -19,6 +20,16 @@ public class SceneInitializer : MonoBehaviour
     public static int MAXPREDATORALLOWED = 500;
     public static bool loadPretrained = false;
     public static int mapSize = 40; // scale is 1:10 (1 unit here = 5 units in the world) (eg. mapSize = 40 => 200x200 world)
+    public static float speedPreys = 2f;
+    public static float speedPredators = 3f;
+    public static int dmgPreys = 8;
+    public static int dmgPredators = 5;
+    public static int fovPreys = 300;
+    public static int fovPredators = 120;
+    public static int numRaysPreys = 24;
+    public static int numRaysPredators = 24;
+    public static int viewRangePreys = 60;
+    public static int viewRangePredators = 120;
 
     // Start is called before the first frame update
     void Awake()
@@ -29,6 +40,8 @@ public class SceneInitializer : MonoBehaviour
         // Predator firstPredator = Instantiate<Predator>(predatorPrefab, new Vector3(4, 0, 0), Quaternion.identity);
         // firstPredator.Generate(1);
         _time = Time.time;
+        _brainStructurePreys[0] = numRaysPreys*2;
+        _brainStructurePredators[0] = numRaysPredators*2;
 
         Prey.MaxPrey = MAXPREYALLOWED;
         Predator.MaxPredator = MAXPREDATORALLOWED;
@@ -60,8 +73,8 @@ public class SceneInitializer : MonoBehaviour
 
         if (loadPretrained)
         {
-            netPrey = new NeuralNetwork(BrainStructure());
-            netPredator = new NeuralNetwork(BrainStructure());
+            netPrey = new NeuralNetwork(_brainStructurePreys);
+            netPredator = new NeuralNetwork(_brainStructurePredators);
             string[] paths = GetPathsOfMostRecentBrains(); // first element is prey, second is predator
             if (paths[0] != null)
             {
@@ -91,11 +104,11 @@ public class SceneInitializer : MonoBehaviour
             //Prey prey = Instantiate<Prey>(preyPrefab, new Vector3(0,0,0), Quaternion.identity);
             if (loadPretrained && isNetPreyLoaded)
             {
-                prey.Generate(1, netPrey);
+                prey.Generate(1, speedPreys, dmgPreys, fovPreys, numRaysPreys, viewRangePreys, netPrey);
             }
             else
             {
-                prey.Generate(1);
+                prey.Generate(1, speedPreys, dmgPreys, fovPreys, numRaysPreys, viewRangePreys);
             }
         }
         Prey.Counter = NUMPREY;
@@ -107,11 +120,11 @@ public class SceneInitializer : MonoBehaviour
             Predator predator = Instantiate<Predator>(predatorPrefab, new Vector3(UnityEngine.Random.Range(-mapSize * 5 + 2, mapSize * 5 - 2), UnityEngine.Random.Range(-mapSize * 5 + 2, mapSize * 5 - 2), 0), randomRotation);
             if (loadPretrained && isNetPredatorLoaded)
             {
-                predator.Generate(1, netPredator);
+                predator.Generate(1, speedPredators, dmgPredators, fovPredators, numRaysPredators, viewRangePredators, netPredator);
             }
             else
             {
-                predator.Generate(1);
+                predator.Generate(1, speedPredators, dmgPredators, fovPredators, numRaysPredators, viewRangePredators);
             }
         }
         Predator.Counter = NUMPREDATOR;
@@ -119,7 +132,9 @@ public class SceneInitializer : MonoBehaviour
 
     string[] GetPathsOfMostRecentBrains()
     {
-        string directoryPath = "./Assets/PretrainedNetworks";
+        string directoryPath = Path.Combine(Application.persistentDataPath, "Assets/PretrainedNetworks");
+        print(directoryPath);
+        Directory.CreateDirectory(directoryPath);
 
         string[] filesPredator = Directory.GetFiles(directoryPath, "PredatorBrain*.txt");
         string[] filesPrey = Directory.GetFiles(directoryPath, "PreyBrain*.txt");
@@ -193,7 +208,7 @@ public class SceneInitializer : MonoBehaviour
                         bestPrey = prey;
                     }
                 }
-                bestPrey.GetComponent<Prey>().SaveMyBrain();
+                bestPrey.GetComponent<Prey>().SaveMyBrain(Path.Combine(Application.persistentDataPath, "Assets/PretrainedNetworks"));
             }
 
 
@@ -207,13 +222,14 @@ public class SceneInitializer : MonoBehaviour
                         bestPredator = predator;
                     }
                 }
-                bestPredator.GetComponent<Predator>().SaveMyBrain();
+                bestPredator.GetComponent<Predator>().SaveMyBrain(Path.Combine(Application.persistentDataPath, "Assets/PretrainedNetworks"));
             }
         }
     }
 
     public static int[] BrainStructure()
     {
-        return _brainStructure;
+        return new int[3] { numRaysPreys > numRaysPredators ? numRaysPreys*2 : numRaysPredators*2, 5, 2 };
+
     }
 }

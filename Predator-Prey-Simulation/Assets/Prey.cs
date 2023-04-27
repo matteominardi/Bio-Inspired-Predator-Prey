@@ -15,7 +15,7 @@ public interface ISelectable : IComponent
     double Fitness { get; }
     bool Alive { get; }
     float Energy { get; }
-    double Speed { get; }
+    float Speed { get; }
     public int Generation { get; }
     public Raycast Raycast { get; }
     public int[] BrainModel { get; }
@@ -36,7 +36,7 @@ public class Prey : MonoBehaviour, ISelectable
     public bool Alive { get; private set; }
 
     public float Energy { get; private set; }
-    public double Speed { get; private set; }
+    public float Speed { get; private set; }
     public int Generation { get; private set; }
     public Raycast Raycast { get; private set; }
     public int[] BrainModel { get; private set; }
@@ -50,6 +50,10 @@ public class Prey : MonoBehaviour, ISelectable
     private float[] _outputs;
     //private bool guard = true;
     private int _counterReproduction = 0;
+    private int _dmg = 5;
+    private int _numRays = 24;
+    private int _fov = 300;
+    private int _viewRange = 30;
 
     // Start is called before the first frame update
     void Start()
@@ -68,7 +72,7 @@ public class Prey : MonoBehaviour, ISelectable
         // GetComponent<Raycast>().Generate(24, 300, 30);
     }
 
-    public void Generate(int generation, NeuralNetwork parent = null)//, float rotationAngle=0)
+    public void Generate(int generation, float speed, int dmg, int fov, int numRays, int viewRange, NeuralNetwork parent = null)//, float rotationAngle=0)
     {
         // lock (_lockPreys)
         // {
@@ -78,31 +82,36 @@ public class Prey : MonoBehaviour, ISelectable
             //     return;
             // }
             //print("NUMBER OF PREYS " + CanReproduce.PreysCounter());
-            BrainModel = new int[] { 48, 5, 2 };
+            Speed = speed;
+            _dmg = dmg;
+            _numRays = numRays;
+            _fov = fov;
+            _viewRange = viewRange;
+            BrainModel = new int[] { _numRays*2, 5, 2 };
 
             if (parent == null)
                 brain = new NeuralNetwork(BrainModel);
             else
             {
                 brain = parent;
-                brain.Mutate(20, 0.5f);
+                brain.Mutate(100, 0.5f);
             }
             Lifepoints = 100;
             Fitness = 0;
             Alive = true;
             Energy = 100;
-            Speed = 2;
+            //Speed = 2;
             Generation = generation;
             _energyExhausted = false;
             _age = Time.time;
-            _inputs = new float[48];
+            _inputs = new float[_numRays*2];
             name = "Prey";
             gameObject.tag = "Prey";
 
             GetComponent<SpriteRenderer>().color = Color.green;
             //GetComponent<Raycast>().Generate(24, 90, 30, this);//, rotationAngle);
             this.Raycast = GetComponent<Raycast>();
-            this.Raycast.Generate(24, 90, 30, this);//, rotationAngle);
+            this.Raycast.Generate(_numRays, _fov, _viewRange, this);//, rotationAngle);
         //}
     }
 
@@ -171,7 +180,7 @@ public class Prey : MonoBehaviour, ISelectable
             //transform.Translate(Vector2.right * Time.deltaTime * 2 );
 
             //rotate
-            transform.Rotate(new Vector3(0, 0, -1) * Time.deltaTime * 90 * 2);
+            transform.Rotate(new Vector3(0, 0, -1) * Time.deltaTime * 90 * 2 * (int)Speed);
             //GetComponent<Raycast>().UpdateRays(-Time.deltaTime * 90 * 2 * 0);
             GetComponent<Raycast>().UpdateRays();
         }
@@ -181,7 +190,7 @@ public class Prey : MonoBehaviour, ISelectable
             //transform.Translate(-Vector2.right * Time.deltaTime * 2 );
 
             //rotate
-            transform.Rotate(new Vector3(0, 0, 1) * Time.deltaTime * 90 * 2);
+            transform.Rotate(new Vector3(0, 0, 1) * Time.deltaTime * 90 * 2 * (int)Speed);
             //GetComponent<Raycast>().UpdateRays(Time.deltaTime * 90 * 2);
             GetComponent<Raycast>().UpdateRays();
         }
@@ -209,11 +218,11 @@ public class Prey : MonoBehaviour, ISelectable
         //     Energy -= 10f * Time.deltaTime;
         // }
 
-        for (int i = 0; i < 24; i++)
+        for (int i = 0; i < _numRays; i++)
         {
             _inputs[i * 2] = GetComponent<Raycast>().Distances[i];
         }
-        for (int i = 0; i < 24; i++)
+        for (int i = 0; i < _numRays; i++)
         {
             _inputs[i * 2 + 1] = GetComponent<Raycast>().WhoIsThere[i];
         }
@@ -229,11 +238,11 @@ public class Prey : MonoBehaviour, ISelectable
         }
         else
         {
-            Energy -= 10f * Time.deltaTime;
+            Energy -= 5f * Time.deltaTime;
         }
 
         transform.Translate(Vector2.up * Time.deltaTime * 2 * (int)Speed * linearVelocity);
-        transform.Rotate(new Vector3(0, 0, angularVelocity) * Time.deltaTime * 90 * 2);
+        transform.Rotate(new Vector3(0, 0, angularVelocity) * Time.deltaTime * 90 * 2 * (int)Speed);
 
         GetComponent<Raycast>().UpdateRays();
     }
@@ -287,7 +296,7 @@ public class Prey : MonoBehaviour, ISelectable
         if (collision.gameObject.name == "Predator")
         {
             //print("I hit a Predator");
-            Lifepoints -= 8;
+            Lifepoints -= _dmg;
             Fitness -= 50 * Time.deltaTime;
 
             if (Lifepoints <= 0)
@@ -298,6 +307,7 @@ public class Prey : MonoBehaviour, ISelectable
                     Alive = false;
                     //CanReproduce.DecrementPreysCounter();
                     Counter--;
+                    Lifepoints = 0;
                     Destroy(gameObject);
                 // }
             }
@@ -322,7 +332,7 @@ public class Prey : MonoBehaviour, ISelectable
         //child.GetComponent<Prey>().Start();
         //child.name = "Prey";
 
-        child.GetComponent<Prey>().Generate(generation + 1, parent.Copy(new NeuralNetwork(new[] { 48, 5, 3 })));//, randomRotationAngle);
+        child.GetComponent<Prey>().Generate(generation + 1, Speed, _dmg, _fov, _numRays, _viewRange, parent.Copy(new NeuralNetwork(BrainModel)));//, randomRotationAngle);
         Counter++;
         // child.GetComponent<Prey>().Generation = generation;
         // child.GetComponent<Prey>().Speed = 2;
@@ -332,9 +342,10 @@ public class Prey : MonoBehaviour, ISelectable
         // child.GetComponent<Prey>().GetComponent<Raycast>().Generate(24, 300, 30);
     }
 
-    public void SaveMyBrain() 
+    public void SaveMyBrain(string path) 
     {
-        brain.Save("./Assets/PretrainedNetworks/PreyBrain" + DateTime.Now.ToString("dd-MM-yyyy") + ".txt");
+        print("saving at "+path + "/PreyBrain" + DateTime.Now.ToString("dd-MM-yyyy") + ".txt");
+        brain.Save(path + "/PreyBrain" + DateTime.Now.ToString("dd-MM-yyyy") + ".txt");
     }
 
     public void LoadMyBrain(string path)
