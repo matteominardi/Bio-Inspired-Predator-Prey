@@ -55,14 +55,14 @@ public class Predator : MonoBehaviour, ISelectable
         _numRays = numRays;
         _fov = fov;
         _viewRange = viewRange;
-        BrainModel = new int[] { _numRays*2, 5, 2 };
-        
+        BrainModel = new int[] { _numRays * 2, 5, 2 };
+
         if (parent == null)
             brain = new NeuralNetwork(BrainModel);
         else
         {
             brain = parent;
-            brain.Mutate(100, 0.5f);
+            brain.Mutate(SceneInitializer.mutationRate, SceneInitializer.mutationAmount);
         }
         Lifepoints = 100;
         Fitness = 0;
@@ -71,7 +71,7 @@ public class Predator : MonoBehaviour, ISelectable
         //Speed = 3;
         Generation = generation;
         ReproductionFactor = 0f;
-        _inputs = new float[_numRays*2];
+        _inputs = new float[_numRays * 2];
         name = "Predator";
         gameObject.tag = "Predator";
 
@@ -218,7 +218,7 @@ public class Predator : MonoBehaviour, ISelectable
     }
 
 
-    public void SaveMyBrain(string path) 
+    public void SaveMyBrain(string path)
     {
         brain.Save(path + "/PredatorBrain" + DateTime.Now.ToString("dd-MM-yyyy") + ".txt");
     }

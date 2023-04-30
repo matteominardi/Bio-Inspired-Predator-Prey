@@ -78,7 +78,7 @@ public class NeuralNetwork
     //     {
     //         List<float[]> layerWeightsList = new List<float[]>();
     //         int NeuronsInPreviousLayer = _layers[i - 1];
-            
+
 
     //         for (int j = 0; j < _neurons[i].Length; j++)
     //         {
@@ -104,7 +104,7 @@ public class NeuralNetwork
         for (int i = 0; i < _layers.Length - 1; i++)
         {
             List<float[]> layerWeightsList = new List<float[]>();
-            int neuronsInNextLayer = _layers[i + 1];            
+            int neuronsInNextLayer = _layers[i + 1];
 
             for (int j = 0; j < _neurons[i].Length; j++)
             {
@@ -188,13 +188,13 @@ public class NeuralNetwork
     /* 
     chance is the chance of mutation, val is the standard deviation of the mutation values, chance should be between 0 and 10
      */
-    public void Mutate(int chance, float val)
+    public void Mutate(float mutationRate, float mutationAmount)
     {
         for (int i = 0; i < _biases.Length; i++)
         {
             for (int j = 0; j < _biases[i].Length; j++)
             {
-                _biases[i][j] = (UnityEngine.Random.Range(0f, chance) <= 5) ? _biases[i][j] += UnityEngine.Random.Range(-val, val) : _biases[i][j];
+                _biases[i][j] = (UnityEngine.Random.Range(0f, 1f) <= mutationRate) ? _biases[i][j] += UnityEngine.Random.Range(-mutationAmount, mutationAmount) : _biases[i][j];
             }
         }
 
@@ -204,7 +204,7 @@ public class NeuralNetwork
             {
                 for (int k = 0; k < _weights[i][j].Length; k++)
                 {
-                    _weights[i][j][k] = (UnityEngine.Random.Range(0f, chance) <= 5) ? _weights[i][j][k] += UnityEngine.Random.Range(-val, val) : _weights[i][j][k];
+                    _weights[i][j][k] = (UnityEngine.Random.Range(0f, 1f) <= mutationRate) ? _weights[i][j][k] += UnityEngine.Random.Range(-mutationAmount, mutationAmount) : _weights[i][j][k];
 
                 }
             }
@@ -246,8 +246,8 @@ public class NeuralNetwork
         int NumberOfLines = (int)new FileInfo(path).Length;
         List<string> ListLines = new List<string>();
         int index = 0;
-        
-        
+
+
         while (!tr.EndOfStream)
         {
             ListLines.Add(tr.ReadLine());
@@ -256,9 +256,9 @@ public class NeuralNetwork
         Debug.Log("Number of lines: " + ListLines.Count);
         // for (int i = 0; i < NumberOfLines; i++)
         // {
-            
+
         //     ListLines[i] = tr.ReadLine();
-            
+
         //     Debug.Log("LINE " + i + " :" + ListLines[i]);
         // }
 

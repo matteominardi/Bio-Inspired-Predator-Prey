@@ -30,6 +30,8 @@ public class SceneInitializer : MonoBehaviour
     public static int numRaysPredators = 24;
     public static int viewRangePreys = 60;
     public static int viewRangePredators = 120;
+    public static float mutationRate = 0.5f;
+    public static float mutationAmount = 1f;
 
     // Start is called before the first frame update
     void Awake()
@@ -40,8 +42,8 @@ public class SceneInitializer : MonoBehaviour
         // Predator firstPredator = Instantiate<Predator>(predatorPrefab, new Vector3(4, 0, 0), Quaternion.identity);
         // firstPredator.Generate(1);
         _time = Time.time;
-        _brainStructurePreys[0] = numRaysPreys*2;
-        _brainStructurePredators[0] = numRaysPredators*2;
+        _brainStructurePreys[0] = numRaysPreys * 2;
+        _brainStructurePredators[0] = numRaysPredators * 2;
 
         Prey.MaxPrey = MAXPREYALLOWED;
         Predator.MaxPredator = MAXPREDATORALLOWED;
@@ -229,7 +231,7 @@ public class SceneInitializer : MonoBehaviour
 
     public static int[] BrainStructure()
     {
-        return new int[3] { numRaysPreys > numRaysPredators ? numRaysPreys*2 : numRaysPredators*2, 5, 2 };
+        return new int[3] { numRaysPreys > numRaysPredators ? numRaysPreys * 2 : numRaysPredators * 2, 5, 2 };
 
     }
 }
