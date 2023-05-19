@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
+using Unity.Entities;
+using Unity.Collections;
 
 public class WindowGraph : MonoBehaviour
 {
@@ -17,6 +19,7 @@ public class WindowGraph : MonoBehaviour
     private CircularBuffer<float> preyBuffer;
     private CircularBuffer<float> predatorBuffer;
     private float timer;
+    private EntityManager entityManager;
     // Start is called before the first frame update
     void Awake()
     {
@@ -39,14 +42,15 @@ public class WindowGraph : MonoBehaviour
         canvas = gameObject.transform.parent.gameObject;
         _lineRendererPrey.transform.SetParent(transform.Find("PreyGraphContainer"), false);
         _lineRendererPredator.transform.SetParent(transform.Find("PredatorGraphContainer"), false);
-        float[] valueList = new float[100];
-        for (int i = 0; i < 100; i++)
+        float[] valueList = new float[1000];
+        for (int i = 0; i < 1000; i++)
         {
             valueList[i] = 0;
         }
         preyBuffer = new CircularBuffer<float>(valueList);
         predatorBuffer = new CircularBuffer<float>(valueList);
         timer = Time.time;
+        entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
         //GetComponent<SpriteRenderer>().sprite = CreateSprite(valueList);
         //ShowGraph(valueList);
         // SpriteShapeController spriteShapeController = gameObject.AddComponent<SpriteShapeController>();
@@ -63,8 +67,10 @@ public class WindowGraph : MonoBehaviour
         if (Time.time - timer > 0.3)
         {
             timer = Time.time;
-            float numberOfPreys = GameObject.FindGameObjectsWithTag("Prey").Length;
-            float numberOfPredators = GameObject.FindGameObjectsWithTag("Predator").Length;
+            //float numberOfPreys = GameObject.FindGameObjectsWithTag("Prey").Length;
+            //float numberOfPredators = GameObject.FindGameObjectsWithTag("Predator").Length;
+            float numberOfPreys = entityManager.CreateEntityQuery(ComponentType.ReadOnly<PreyTag>()).CalculateEntityCount();
+            float numberOfPredators = entityManager.CreateEntityQuery(ComponentType.ReadOnly<PredatorTag>()).CalculateEntityCount();
             preyBuffer.Add(numberOfPreys);
             predatorBuffer.Add(numberOfPredators);
             var valuesInBufferPrey = preyBuffer.Cycle();

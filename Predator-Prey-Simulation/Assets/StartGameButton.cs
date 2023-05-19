@@ -15,7 +15,7 @@ public class StartGameButton : MonoBehaviour
     void Start()
     {
         Button btn = GetComponent<Button>();
-        btn.onClick.AddListener(OnClick);
+        //btn.onClick.AddListener(OnClick);
     }
 
     // public StartGameButton(MenuController menuController, LoadingScreenController loadingScreen)
@@ -26,7 +26,10 @@ public class StartGameButton : MonoBehaviour
 
     public void OnClick()
     {
+        //print("StartGameButton.OnClick()");
         menuController.GetComponent<MenuController>().ConfirmChanges();
+        //print("StartGameButton after click");
+
         StartCoroutine(LoadGameSceneAsync());
     }
 
@@ -49,7 +52,7 @@ public class StartGameButton : MonoBehaviour
 
         yield return new WaitForSeconds(0.5f);
         // Load game scene asynchronously
-        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("GameScene");
+        AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("GameScene", LoadSceneMode.Single);
 
 
         // float fakeProgress = 0f;

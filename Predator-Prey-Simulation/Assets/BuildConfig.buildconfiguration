@@ -1,0 +1,39 @@
+{
+    "Show": true,
+    "Dependencies": [],
+    "Components": [
+        {
+            "$type": "Unity.Build.Common.GeneralSettings, Unity.Build",
+            "ProductName": "Predator-Prey-Simulation",
+            "CompanyName": "DefaultCompany",
+            "Version": "1.1"
+        },
+        {
+            "$type": "Unity.Build.Classic.ClassicBuildProfile, Unity.Build.Classic",
+            "$version": 1,
+            "Platform": "StandaloneOSX",
+            "Configuration": 3
+        },
+        {
+            "$type": "Unity.Build.Classic.ClassicScriptingSettings, Unity.Build.Classic",
+            "ScriptingBackend": 1,
+            "Il2CppCompilerConfiguration": 2,
+            "UseIncrementalGC": true
+        },
+        {
+            "$type": "Unity.Build.Common.SceneList, Unity.Build",
+            "$version": 1,
+            "BuildCurrentScene": false,
+            "SceneInfos": [
+                {
+                    "Scene": "GlobalObjectId_V1-1-80d17d90b6300cf45b46cc1bc16b9b87-102900000-0",
+                    "AutoLoad": true
+                },
+                {
+                    "Scene": "GlobalObjectId_V1-1-a9379385acc7b8940910fc6e6f8b172e-102900000-0",
+                    "AutoLoad": false
+                }
+            ]
+        }
+    ]
+}

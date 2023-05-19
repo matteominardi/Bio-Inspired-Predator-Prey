@@ -6,8 +6,6 @@ Project Description
 
 ### Todo
 
-- [ ] Add a starting scene to set up the parameters (eg. num of preys, map size...) before the simulation starts  
-- [ ] Fix FPS  
 - [ ] Remove biases from input layer (not important)  
 - [ ] multi-run with adaptive speed/size  
 
@@ -16,6 +14,8 @@ Project Description
 
 ### Done ✓
 
+- [x] Add a starting scene to set up the parameters (eg. num of preys, map size...) before the simulation starts  
+- [x] Fix FPS  
 - [x] Fix lines when zooming (graph and links of the NNs)  
 - [x] Ordering of links in the NNs  
 - [x] Spawn randomly with map borders in sceneInitializer  

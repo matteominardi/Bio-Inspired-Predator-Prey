@@ -11,9 +11,8 @@ GameObject:
   - component: {fileID: 5315155606886149148}
   - component: {fileID: 5315155606886149151}
   - component: {fileID: 5315155606886149150}
-  - component: {fileID: 5315155606886149137}
-  - component: {fileID: 5315155606886149149}
-  - component: {fileID: 5315155606886149146}
+  - component: {fileID: 4595751665624120238}
+  - component: {fileID: 4288594231156479863}
   m_Layer: 0
   m_Name: Prey
   m_TagString: SelectableObject
@@ -57,7 +56,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -105,19 +104,7 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 0.5
---- !u!114 &5315155606886149137
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5315155606886149136}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f41de36199eaf4efb84d5c8c55c36af5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!50 &5315155606886149149
+--- !u!50 &4595751665624120238
 Rigidbody2D:
   serializedVersion: 4
   m_ObjectHideFlags: 0
@@ -130,15 +117,15 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDrag: 0.4
-  m_AngularDrag: 0.05
-  m_GravityScale: 1
+  m_LinearDrag: 4
+  m_AngularDrag: 4
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &5315155606886149146
+--- !u!114 &4288594231156479863
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -147,12 +134,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 5315155606886149136}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d6d0751535d9945ffbe97c27cb6226ee, type: 3}
+  m_Script: {fileID: 11500000, guid: ea7d7495833204790ba1d3a8755397f8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  layerMask:
-    serializedVersion: 2
-    m_Bits: 0
+  ConversionMode: 0
 --- !u!1 &5315155608003029281
 GameObject:
   m_ObjectHideFlags: 0
@@ -205,7 +190,7 @@ SpriteRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 10754, guid: 0000000000000000f000000000000000, type: 0}
+  - {fileID: 2100000, guid: a97c105638bdf8b4a8650670310a4cd3, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0

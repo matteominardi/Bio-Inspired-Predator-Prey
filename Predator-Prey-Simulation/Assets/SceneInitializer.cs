@@ -34,7 +34,7 @@ public class SceneInitializer : MonoBehaviour
     public static float mutationAmount = 1f;
 
     // Start is called before the first frame update
-    void Awake()
+    void Start()
     {
         // Prey firstPrey = Instantiate<Prey>(preyPrefab, new Vector3(0, 0, 0), Quaternion.identity);
         // firstPrey.Generate(1);
