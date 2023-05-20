@@ -71,6 +71,7 @@ public struct PreyComponent : IComponentData//, ISelectableEntity
     //public bool guard = true;
     public int _counterReproduction;
     public int _dmg;
+    public float _timerStopCollision;
     //public int _numRays;
     //public int _fov;
     //public int _viewRange;

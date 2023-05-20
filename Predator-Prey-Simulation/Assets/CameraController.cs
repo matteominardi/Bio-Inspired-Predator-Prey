@@ -23,7 +23,7 @@ public class CameraController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _mapSize = SceneInitializer.mapSize * 10;
+        _mapSize = SceneInitializerECS.mapSize * 10;
         _maxZoom = -_mapSize;
         _minZoom = -10.46f;
         entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;

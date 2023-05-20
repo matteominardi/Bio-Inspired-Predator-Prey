@@ -9,6 +9,7 @@ using Unity.Transforms;
 using UnityEngine;
 
 [UpdateAfter(typeof(NNSystem))]
+[UpdateAfter(typeof(CollisionSystem))]
 public partial class ActionPreySystem : SystemBase
 {
     public Unity.Mathematics.Random random;
@@ -29,6 +30,8 @@ public partial class ActionPreySystem : SystemBase
     private EntityCommandBufferSystem _ecb;
     private int _timerReproduction;
     private float _energyGain;
+    
+    private EndSimulationEntityCommandBufferSystem commandBufferSystem;
 
     protected override void OnStartRunning()
     {
@@ -62,6 +65,8 @@ public partial class ActionPreySystem : SystemBase
         _timerReproduction = SceneInitializerECS.timerReproductionPreys;
         _energyGain = SceneInitializerECS.energyGainPreys;
 
+        commandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+
     }
     protected override void OnUpdate()
     {
@@ -71,6 +76,11 @@ public partial class ActionPreySystem : SystemBase
         bool arrowUp = Input.GetKey(KeyCode.UpArrow);
         bool arrowLeft = Input.GetKey(KeyCode.LeftArrow);
         bool arrowRight = Input.GetKey(KeyCode.RightArrow);
+        bool mKey = Input.GetKeyDown(KeyCode.M);
+        if (mKey)
+        {
+            SceneInitializerECS.ManualMovement = !SceneInitializerECS.ManualMovement;
+        }
         //Debug.Log("arrowDown: " + arrowDown + " arrowUp: " + arrowUp + " arrowLeft: " + arrowLeft + " arrowRight: " + arrowRight);
         
 
@@ -79,6 +89,7 @@ public partial class ActionPreySystem : SystemBase
 
         float _timerReproduction = this._timerReproduction;
         float _energyGain = this._energyGain;
+        bool _manualMovement = SceneInitializerECS.ManualMovement;
         Entities
         .WithAll<PreyTag>()
         .ForEach((Entity e, ref Translation translation, ref PhysicsVelocity velocity, ref PreyComponent preyComponent,  ref Rotation rotation, ref DynamicBuffer<OutputDataElement> outputs) => {
@@ -88,6 +99,11 @@ public partial class ActionPreySystem : SystemBase
             }
 
             preyComponent.Fitness += 1.0f * deltaTime;
+
+            if (preyComponent._timerStopCollision > 0f)
+            {
+                preyComponent._timerStopCollision -= deltaTime;
+            }
 
             if (preyComponent.Energy <= 0f)
             {
@@ -112,52 +128,100 @@ public partial class ActionPreySystem : SystemBase
                 }
                 return;
             }
-            
-            if (arrowRight)
-            {
-                // move right
-                //transform.Translate(Vector2.right * deltaTime * 2 );
 
-                //rotate
-                //rotation.Value = math.mul(rotation.Value, quaternion.RotateZ(math.radians(-deltaTime * 90 * 2 * (int)preyComponent.Speed)));
-                velocity.Angular.z = -deltaTime * 90 * math.min((int)preyComponent.Speed, 3);
-                //transform.Rotate(new Vector3(0, 0, -1) * deltaTime * 90 * 2 * (int)preyComponent.Speed);
-                //GetComponent<Raycast>().UpdateRays(-deltaTime * 90 * 2 * 0);
-                //GetComponent<Raycast>().UpdateRays();
-            }
-            if (arrowLeft)
-            {
-                // move left
-                //transform.Translate(-Vector2.right * deltaTime * 2 );
+            preyComponent._age += 1.0f * deltaTime;
 
-                //rotate
-                //rotation.Value = math.mul(rotation.Value, quaternion.RotateZ(math.radians(deltaTime * 90 * 2 * (int)preyComponent.Speed)));
-                velocity.Angular.z = deltaTime * 90 * math.min((int)preyComponent.Speed, 3);
-                //transform.Rotate(new Vector3(0, 0, 1) * deltaTime * 90 * 2 * (int)preyComponent.Speed);
-                //GetComponent<Raycast>().UpdateRays(deltaTime * 90 * 2);
-                //GetComponent<Raycast>().UpdateRays();
-            }
             float3 forward = math.mul(rotation.Value, new float3(0, 1, 0));
-            if (arrowUp)
-            {
-                // move up
-                //translation.Value += forward * deltaTime * 2 * (int)preyComponent.Speed;
-                velocity.Linear = forward  * 2 * (int)preyComponent.Speed;
-                //transform.Translate(Vector2.up * deltaTime * 2 * (int)preyComponent.Speed);
-                //GetComponent<Raycast>().UpdateRays(0);
-                //GetComponent<Raycast>().UpdateRays();
-            }
-            if (arrowDown)
-            {
-                // move down
-                //float3 forward = math.mul(rotation.Value, new float3(0, 1, 0));
-                //translation.Value += -forward * deltaTime * 2 * (int)preyComponent.Speed;
-                velocity.Linear = -forward * 2 * (int)preyComponent.Speed;
-                //transform.Translate(Vector2.down * deltaTime * 2 * (int)preyComponent.Speed);
-                //GetComponent<Raycast>().UpdateRays(0);
-                //GetComponent<Raycast>().UpdateRays();
-            }
 
+            if (_manualMovement)
+            {
+                if (arrowRight)
+                {
+                    // move right
+                    //transform.Translate(Vector2.right * deltaTime * 2 );
+
+                    //rotate
+                    //rotation.Value = math.mul(rotation.Value, quaternion.RotateZ(math.radians(-deltaTime * 90 * 2 * (int)preyComponent.Speed)));
+                    velocity.Angular.z = -deltaTime * 90 * 2 * math.min((int)preyComponent.Speed, 3);
+                    //transform.Rotate(new Vector3(0, 0, -1) * deltaTime * 90 * 2 * (int)preyComponent.Speed);
+                    //GetComponent<Raycast>().UpdateRays(-deltaTime * 90 * 2 * 0);
+                    //GetComponent<Raycast>().UpdateRays();
+                }
+                if (arrowLeft)
+                {
+                    // move left
+                    //transform.Translate(-Vector2.right * deltaTime * 2 );
+
+                    //rotate
+                    //rotation.Value = math.mul(rotation.Value, quaternion.RotateZ(math.radians(deltaTime * 90 * 2 * (int)preyComponent.Speed)));
+                    velocity.Angular.z = deltaTime * 90 * 2 * math.min((int)preyComponent.Speed, 3);
+                    //transform.Rotate(new Vector3(0, 0, 1) * deltaTime * 90 * 2 * (int)preyComponent.Speed);
+                    //GetComponent<Raycast>().UpdateRays(deltaTime * 90 * 2);
+                    //GetComponent<Raycast>().UpdateRays();
+                }
+                
+                if (arrowUp)
+                {
+                    // move up
+                    //translation.Value += forward * deltaTime * 2 * (int)preyComponent.Speed;
+                    velocity.Linear = forward  * 2 * (int)preyComponent.Speed;
+                    //transform.Translate(Vector2.up * deltaTime * 2 * (int)preyComponent.Speed);
+                    //GetComponent<Raycast>().UpdateRays(0);
+                    //GetComponent<Raycast>().UpdateRays();
+                }
+                if (arrowDown)
+                {
+                    // move down
+                    //float3 forward = math.mul(rotation.Value, new float3(0, 1, 0));
+                    //translation.Value += -forward * deltaTime * 2 * (int)preyComponent.Speed;
+                    velocity.Linear = -forward * 2 * (int)preyComponent.Speed;
+                    //transform.Translate(Vector2.down * deltaTime * 2 * (int)preyComponent.Speed);
+                    //GetComponent<Raycast>().UpdateRays(0);
+                    //GetComponent<Raycast>().UpdateRays();
+                }
+                if ((!arrowUp && !arrowRight && !arrowLeft && !arrowDown))
+                {
+                    if (preyComponent.Energy <= 100)
+                        preyComponent.Energy = math.min(preyComponent.Energy + _energyGain * deltaTime, 100);
+                }
+                else
+                {
+                    preyComponent.Energy -= _energyGain * deltaTime;
+                }
+            }
+            else 
+            {
+                DynamicBuffer<float> _outputs = outputs.Reinterpret<float>(); //brain.FeedForward(_inputs);
+
+                float angularVelocity = _outputs[0];
+                float linearVelocity = _outputs[1];
+
+                if ((angularVelocity == 0f && linearVelocity == 0f))
+                {
+                    if (preyComponent.Energy <= 100)
+                        preyComponent.Energy = math.min(preyComponent.Energy + _energyGain * deltaTime, 100);
+                }
+                else
+                {
+                    preyComponent.Energy -= _energyGain * deltaTime * math.max(math.abs(angularVelocity), math.abs(linearVelocity));
+                }
+
+                if (float.IsNaN(translation.Value.x))
+                {
+                    //Debug.Log("translation is NaN");
+                    return;
+                }
+                float3 forwardMove = forward * 2 * (int)preyComponent.Speed * linearVelocity;
+                if (float.IsNaN(forwardMove.x) || float.IsNaN(forwardMove.y) || float.IsNaN(forwardMove.z) || float.IsNaN(deltaTime * 90 * 2 * (int)preyComponent.Speed * angularVelocity))
+                {
+                    //Debug.Log("forwardMove is NaN: " + forwardMove + " deltaTime: " + deltaTime + " angularVelocity: " + angularVelocity);
+                    return;
+                }
+                velocity.Linear = forward * 2 * (int)preyComponent.Speed * linearVelocity;
+                velocity.Angular.z = deltaTime * 90 * 2 * (int)preyComponent.Speed * angularVelocity;
+                //translation.Value += forward * deltaTime * 2 * (int)preyComponent.Speed * linearVelocity;
+                //rotation.Value = math.mul(rotation.Value, quaternion.RotateZ(math.radians(deltaTime * 90 * math.min((int)preyComponent.Speed, 3) * angularVelocity)));
+            }
             // for (int i = 0; i < preyComponent._numRays; i++)
             // {
             //     _inputs[i * 2] = GetComponent<Raycast>().Distances[i];
@@ -167,20 +231,7 @@ public partial class ActionPreySystem : SystemBase
             //     _inputs[i * 2 + 1] = GetComponent<Raycast>().WhoIsThere[i];
             // }
             
-            DynamicBuffer<float> _outputs = outputs.Reinterpret<float>(); //brain.FeedForward(_inputs);
-
-            float angularVelocity = _outputs[0];
-            float linearVelocity = _outputs[1];
-
-            if ((angularVelocity == 0f && linearVelocity == 0f && !arrowUp && !arrowRight && !arrowLeft && !arrowDown))
-            {
-                if (preyComponent.Energy <= 100)
-                    preyComponent.Energy = math.min(preyComponent.Energy + _energyGain * deltaTime, 100);
-            }
-            else
-            {
-                preyComponent.Energy -= _energyGain * deltaTime * math.max(math.abs(angularVelocity), math.abs(linearVelocity));
-            }
+            
 
             
 
@@ -188,21 +239,9 @@ public partial class ActionPreySystem : SystemBase
             //Debug.Log("linearVelocity: " + linearVelocity + " forward " + forward  + " deltatime " +  deltaTime + " speed: " + (int)preyComponent.Speed);
             //Debug.Log("linearVelocity update: " + forward * deltaTime * 2 * (int)preyComponent.Speed * linearVelocity + " non-vector: " + deltaTime * 2 * (int)preyComponent.Speed * linearVelocity);
             //Debug.Log("angularVelocity: " + angularVelocity);
-            translation.Value += forward * deltaTime * 2 * (int)preyComponent.Speed * linearVelocity;
-            rotation.Value = math.mul(rotation.Value, quaternion.RotateZ(math.radians(deltaTime * 90 * math.min((int)preyComponent.Speed, 3) * angularVelocity)));
-            if (float.IsNaN(translation.Value.x))
-            {
-                //Debug.Log("translation is NaN");
-                return;
-            }
-            float3 forwardMove = forward * 2 * (int)preyComponent.Speed * linearVelocity;
-            if (float.IsNaN(forwardMove.x) || float.IsNaN(forwardMove.y) || float.IsNaN(forwardMove.z) || float.IsNaN(deltaTime * 90 * 2 * (int)preyComponent.Speed * angularVelocity))
-            {
-                //Debug.Log("forwardMove is NaN: " + forwardMove + " deltaTime: " + deltaTime + " angularVelocity: " + angularVelocity);
-                return;
-            }
-            //velocity.Linear = forward * 2 * (int)preyComponent.Speed * linearVelocity;
-            //velocity.Angular.z = deltaTime * 90 * 2 * (int)preyComponent.Speed * angularVelocity;
+            // translation.Value += forward * deltaTime * 2 * (int)preyComponent.Speed * linearVelocity;
+            // rotation.Value = math.mul(rotation.Value, quaternion.RotateZ(math.radians(deltaTime * 90 * math.min((int)preyComponent.Speed, 3) * angularVelocity)));
+            
 
             //transform.Translate(Vector2.up * deltaTime * 2 * (int)preyComponent.Speed * linearVelocity);
             //transform.Rotate(new Vector3(0, 0, angularVelocity) * deltaTime * 90 * 2 * (int)preyComponent.Speed);
@@ -212,10 +251,12 @@ public partial class ActionPreySystem : SystemBase
         }).WithBurst().ScheduleParallel();//.WithBurst().ScheduleParallel();
         Dependency.Complete();
 
-        EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.TempJob);
-        EntityCommandBuffer.ParallelWriter parallelEcb = ecb.AsParallelWriter();
+        //EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.TempJob);
+        EntityCommandBuffer ecb = commandBufferSystem.CreateCommandBuffer();
+        //EntityCommandBuffer.ParallelWriter parallelEcb = ecb.AsParallelWriter();
         Entities
         .WithAll<PreyTag>()
+        .WithoutBurst()
         .ForEach((Entity e, int entityInQueryIndex, ref Translation translation, ref PreyComponent preyComponent, ref DynamicBuffer<LayerDataElement> layers, ref DynamicBuffer<NeuronDataElement> neurons, ref DynamicBuffer<BiasDataElement> biases, ref DynamicBuffer<WeightDataElement> weights) => {
             // if (preyComponent.Alive == false)
             // {
@@ -223,10 +264,18 @@ public partial class ActionPreySystem : SystemBase
             //     SceneInitializerECS.NUMPREY--;
             //     return;
             // }
-            if (preyComponent.Alive && (int)preyComponent.Fitness % _timerReproduction == 0 && (math.floor(preyComponent.Fitness) / _timerReproduction) > preyComponent._counterReproduction && SceneInitializerECS.NUMPREY < SceneInitializerECS.MAXPREYALLOWED)
+            if (preyComponent.Alive == false)
+            {
+                Debug.Log("prey died " + EntityManager.Exists(e));
+                //parallelEcb.DestroyEntity(entityInQueryIndex, e);
+                ecb.DestroyEntity(e);
+                SceneInitializerECS.NUMPREY--;
+                return;
+            }
+            if (preyComponent.Alive && (int)preyComponent._age % _timerReproduction == 0 && (math.floor(preyComponent._age) / _timerReproduction) > preyComponent._counterReproduction && SceneInitializerECS.NUMPREY < SceneInitializerECS.MAXPREYALLOWED)
             {
                 preyComponent._counterReproduction++;
-                preyComponent._age = time;
+                //preyComponent._age = time;
                 //Reproduce(translation, preyComponent.Generation, biases, weights, parallelEcb, entityInQueryIndex);
 
                 // reproduce function
@@ -237,14 +286,20 @@ public partial class ActionPreySystem : SystemBase
                 float randomRotationAngle = random.NextFloat(0, 360); //UnityEngine.Random.Range(0.0f, 360.0f);
                 quaternion randomRotation = quaternion.Euler(0.0f, 0.0f, math.radians(randomRotationAngle));
                 //print("Random rotation " + randomRotationAngle);
-                Entity child = parallelEcb.CreateEntity(entityInQueryIndex, SceneInitializerECS.PreyArchetype);
-                parallelEcb.SetComponent(entityInQueryIndex, child, new Translation { Value = new float3(randomPosition.x, randomPosition.y, 0) });
-                parallelEcb.SetComponent(entityInQueryIndex, child, new Rotation { Value = randomRotation });
+
+                // Entity child = parallelEcb.CreateEntity(entityInQueryIndex, SceneInitializerECS.PreyArchetype);
+                // parallelEcb.SetComponent(entityInQueryIndex, child, new Translation { Value = new float3(randomPosition.x, randomPosition.y, 0) });
+                // parallelEcb.SetComponent(entityInQueryIndex, child, new Rotation { Value = randomRotation });
+
+                Entity child = ecb.CreateEntity(SceneInitializerECS.PreyArchetype);
+                ecb.SetComponent(child, new Translation { Value = new float3(randomPosition.x, randomPosition.y, 0) });
+                ecb.SetComponent(child, new Rotation { Value = randomRotation });
 
                 //child.GetComponent<Prey>().Start();
                 //child.name = "Prey";
 
-                parallelEcb.SetComponent<PreyComponent>(entityInQueryIndex, child, new PreyComponent {
+                //parallelEcb.SetComponent<PreyComponent>(entityInQueryIndex, child, new PreyComponent {
+                ecb.SetComponent<PreyComponent>(child, new PreyComponent {
                     Alive = true,
                     Lifepoints = 100,
                     Fitness = 0f,
@@ -256,23 +311,33 @@ public partial class ActionPreySystem : SystemBase
                     //_numRays = SceneInitializerECS.numRaysPreys,
                     _energyExhausted = false,
                     _dmg = dmgPreys,
+                    _timerStopCollision = 0f
 
                 });
 
-                parallelEcb.SetComponent(entityInQueryIndex, child, new RaycastComponent() { 
+                //parallelEcb.SetComponent(entityInQueryIndex, child, new RaycastComponent() { 
+                ecb.SetComponent(child, new RaycastComponent() { 
                         //physicsWorld = buildPhysicsWorld.PhysicsWorld,
                         _numberOfRays = numRaysPreys,
                         _fov = fovPreys,
                         _viewRange = viewRangePreys,
                         toggleShowRays = false
                 });
-                DynamicBuffer<DistanceDataElement> distancesChild = parallelEcb.AddBuffer<DistanceDataElement>(entityInQueryIndex, child);
-                DynamicBuffer<WhoIsThereDataElement> whoIsThereChild = parallelEcb.AddBuffer<WhoIsThereDataElement>(entityInQueryIndex, child);
-                DynamicBuffer<LayerDataElement> layersChild = parallelEcb.AddBuffer<LayerDataElement>(entityInQueryIndex, child);
-                DynamicBuffer<NeuronDataElement> neuronsChild = parallelEcb.AddBuffer<NeuronDataElement>(entityInQueryIndex, child);
-                DynamicBuffer<WeightDataElement> weightsChild = parallelEcb.AddBuffer<WeightDataElement>(entityInQueryIndex, child);
-                DynamicBuffer<BiasDataElement> biasesChild = parallelEcb.AddBuffer<BiasDataElement>(entityInQueryIndex, child);
-                DynamicBuffer<OutputDataElement> outputsChild = parallelEcb.AddBuffer<OutputDataElement>(entityInQueryIndex, child);
+                // DynamicBuffer<DistanceDataElement> distancesChild = parallelEcb.AddBuffer<DistanceDataElement>(entityInQueryIndex, child);
+                // DynamicBuffer<WhoIsThereDataElement> whoIsThereChild = parallelEcb.AddBuffer<WhoIsThereDataElement>(entityInQueryIndex, child);
+                // DynamicBuffer<LayerDataElement> layersChild = parallelEcb.AddBuffer<LayerDataElement>(entityInQueryIndex, child);
+                // DynamicBuffer<NeuronDataElement> neuronsChild = parallelEcb.AddBuffer<NeuronDataElement>(entityInQueryIndex, child);
+                // DynamicBuffer<WeightDataElement> weightsChild = parallelEcb.AddBuffer<WeightDataElement>(entityInQueryIndex, child);
+                // DynamicBuffer<BiasDataElement> biasesChild = parallelEcb.AddBuffer<BiasDataElement>(entityInQueryIndex, child);
+                // DynamicBuffer<OutputDataElement> outputsChild = parallelEcb.AddBuffer<OutputDataElement>(entityInQueryIndex, child);
+
+                DynamicBuffer<DistanceDataElement> distancesChild = ecb.AddBuffer<DistanceDataElement>(child);
+                DynamicBuffer<WhoIsThereDataElement> whoIsThereChild = ecb.AddBuffer<WhoIsThereDataElement>(child);
+                DynamicBuffer<LayerDataElement> layersChild = ecb.AddBuffer<LayerDataElement>(child);
+                DynamicBuffer<NeuronDataElement> neuronsChild = ecb.AddBuffer<NeuronDataElement>(child);
+                DynamicBuffer<WeightDataElement> weightsChild = ecb.AddBuffer<WeightDataElement>(child);
+                DynamicBuffer<BiasDataElement> biasesChild = ecb.AddBuffer<BiasDataElement>(child);
+                DynamicBuffer<OutputDataElement> outputsChild = ecb.AddBuffer<OutputDataElement>(child);
                 distancesChild.ResizeUninitialized(numRaysPreys);
                 whoIsThereChild.ResizeUninitialized(numRaysPreys);
                 weightsChild.ResizeUninitialized(numWeightsPreys);
@@ -314,15 +379,18 @@ public partial class ActionPreySystem : SystemBase
 
                 // end mutate function
 
-                parallelEcb.SetSharedComponent(entityInQueryIndex, child, new RenderMesh() { 
+                //parallelEcb.SetSharedComponent(entityInQueryIndex, child, new RenderMesh() { 
+                ecb.SetSharedComponent(child, new RenderMesh() { 
                     mesh = meshAgent,
                     material = materialPrey,
                     layerMask = 1
                 });
 
-                parallelEcb.SetComponent(entityInQueryIndex, child, new URPMaterialPropertyBaseColor {Value = new float4(0, 1f, 0, 1)});
+                //parallelEcb.SetComponent(entityInQueryIndex, child, new URPMaterialPropertyBaseColor {Value = new float4(0, 1f, 0, 1)});
+                ecb.SetComponent(child, new URPMaterialPropertyBaseColor {Value = new float4(0, 1f, 0, 1)});
 
-                parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsMass {
+                //parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsMass {
+                ecb.SetComponent(child, new PhysicsMass {
                     InverseMass = 1f,
                     InverseInertia = new float3(1f, 1f, 1f),
                     Transform = RigidTransform.identity
@@ -337,15 +405,16 @@ public partial class ActionPreySystem : SystemBase
                     //Restitution = Unity.Physics.Material.Default.Restitution,
                     //RestitutionCombinePolicy = Unity.Physics.Material.Default.RestitutionCombinePolicy,
                 };
-                var collisionFilter = new Unity.Physics.CollisionFilter
-                {
-                    BelongsTo = ~0u,
-                    CollidesWith = ~0u,
-                    GroupIndex = 0
-                };
+                // var collisionFilter = new Unity.Physics.CollisionFilter
+                // {
+                //     BelongsTo = ~0u,
+                //     CollidesWith = ~0u,
+                //     GroupIndex = 0
+                // };
 
 
-                parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsCollider { Value = Unity.Physics.SphereCollider.Create(new SphereGeometry() { 
+                //parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsCollider { Value = Unity.Physics.SphereCollider.Create(new SphereGeometry() { 
+                ecb.SetComponent(child, new PhysicsCollider { Value = Unity.Physics.SphereCollider.Create(new SphereGeometry() { 
                     Center = new float3(0f, 0f, 0f),
                     Radius = 0.5f,
 
@@ -359,13 +428,15 @@ public partial class ActionPreySystem : SystemBase
                 //     SideCount = 3
                 // }, Unity.Physics.CollisionFilter.Default) });
 
-                parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsDamping()
+                //parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsDamping()
+                ecb.SetComponent(child, new PhysicsDamping()
                 {
                     Linear = 4f,
                     Angular = 4f
                 });
 
-                parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsGravityFactor()
+                //parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsGravityFactor()
+                ecb.SetComponent(child, new PhysicsGravityFactor()
                 {
                     Value = 0f
                 });
@@ -379,7 +450,9 @@ public partial class ActionPreySystem : SystemBase
                 //     mesh = EntityManager.GetSharedComponentData<RenderMesh>(e).mesh,
                 //     material = EntityManager.GetSharedComponentData<RenderMesh>(e).material
                 // });//.material.SetColor("_Color", new Color(0, 0.3f, 0));
-                parallelEcb.SetComponent(entityInQueryIndex, e, new URPMaterialPropertyBaseColor {Value = new float4(0, 0.3f, 0, 1)});
+                
+                //parallelEcb.SetComponent(entityInQueryIndex, e, new URPMaterialPropertyBaseColor {Value = new float4(0, 0.3f, 0, 1)});
+                ecb.SetComponent(e, new URPMaterialPropertyBaseColor {Value = new float4(0, 0.3f, 0, 1)});
             }
             else if (preyComponent.Alive)
             {
@@ -388,20 +461,17 @@ public partial class ActionPreySystem : SystemBase
                 //{
                     
                     //EntityManager.GetSharedComponentData<RenderMesh>(e).material.SetColor("_Color", new Color(0, 1f, 0));
-                    parallelEcb.SetComponent(entityInQueryIndex, e, new URPMaterialPropertyBaseColor {Value = new float4(0, 1f, 0, 1)});
+                    //parallelEcb.SetComponent(entityInQueryIndex, e, new URPMaterialPropertyBaseColor {Value = new float4(0, 1f, 0, 1)});
+                    ecb.SetComponent(e, new URPMaterialPropertyBaseColor {Value = new float4(0, 1f, 0, 1)});
                 //}
             }
-            if (preyComponent.Alive == false)
-            {
-                parallelEcb.DestroyEntity(entityInQueryIndex, e);
-                SceneInitializerECS.NUMPREY--;
-            }
-        }).WithoutBurst().Run();
+            
+        }).Run();
 
-        Dependency.Complete();
+        commandBufferSystem.AddJobHandleForProducer(Dependency);//.Complete();
         //Debug.Log("Prey count: " + SceneInitializerECS.NUMPREY);
-        ecb.Playback(this.EntityManager);
-        ecb.Dispose();
+        //ecb.Playback(this.EntityManager);
+        //ecb.Dispose();
     }
 
     // public void Reproduce(Translation translation, int generation, DynamicBuffer<BiasDataElement> biasesParent, DynamicBuffer<WeightDataElement> weightsParent, EntityCommandBuffer.ParallelWriter ecb, int entityInQueryIndex) 

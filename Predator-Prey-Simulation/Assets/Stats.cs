@@ -15,7 +15,7 @@ public class Stats : MonoBehaviour
     [SerializeField] public GameObject CanvasParent;
     public GameObject neuronPrefab;
     //ISelectable selectedObject;
-    bool isSelectedEntityPrey = false;
+    //bool isSelectedEntityPrey = false;
     Entity selectedEntity;
     TMPro.TextMeshProUGUI refTxtHealth;
     TMPro.TextMeshProUGUI refTxtFitness;
@@ -225,7 +225,7 @@ public class Stats : MonoBehaviour
 
                     if (entityManager.HasComponent<PreyTag>(clickedEntity))
                     {
-                        isSelectedEntityPrey = true;  
+                        //isSelectedEntityPrey = true;  
                         PreyComponent preyComponent = entityManager.GetComponentData<PreyComponent>(clickedEntity);
                         health = preyComponent.Lifepoints.ToString();
                         fitness = ((int)preyComponent.Fitness).ToString();
@@ -236,7 +236,7 @@ public class Stats : MonoBehaviour
                     }
                     else if (entityManager.HasComponent<PredatorTag>(clickedEntity))
                     {
-                        isSelectedEntityPrey = false;
+                        //isSelectedEntityPrey = false;
                         PredatorComponent predatorComponent = entityManager.GetComponentData<PredatorComponent>(clickedEntity);
                         health = predatorComponent.Lifepoints.ToString();
                         fitness = ((int)predatorComponent.Fitness).ToString();
@@ -307,7 +307,7 @@ public class Stats : MonoBehaviour
                     }
                     else
                     {
-                        print("clicked on something that is not UI");
+                        //print("clicked on something that is not UI");
                         selectedEntity = Entity.Null;
                         refTxtHealth.text = "";
                         refTxtFitness.text = "";

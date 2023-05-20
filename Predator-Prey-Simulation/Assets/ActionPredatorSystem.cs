@@ -75,6 +75,7 @@ public partial class ActionPredatorSystem : SystemBase
         //var parallelEcb = _ecb.CreateCommandBuffer().AsParallelWriter(); //new EntityCommandBuffer(Allocator.TempJob);
 
         float energyLoss = this._energyLoss;
+        bool _manualMovement = SceneInitializerECS.ManualMovement;
         Entities
         .WithAll<PredatorTag>()
         .ForEach((Entity e, ref Translation translation, ref PhysicsVelocity velocity, ref PredatorComponent predatorComponent,  ref Rotation rotation, ref DynamicBuffer<OutputDataElement> outputs) => {
@@ -94,6 +95,10 @@ public partial class ActionPredatorSystem : SystemBase
 
             predatorComponent.Fitness += 1.0f * deltaTime;
             predatorComponent.ReproductionFactor = math.max(predatorComponent.ReproductionFactor - energyLoss * deltaTime, 0);
+            if (predatorComponent._timerStopCollision > 0f)
+            {
+                predatorComponent._timerStopCollision -= deltaTime;
+            }
             //GetComponent<Raycast>().UpdateRays(0);
 
             // if (predatorComponent.Energy <= 0)
@@ -107,66 +112,79 @@ public partial class ActionPredatorSystem : SystemBase
 
             // _-----------------------____-----___--_-__-----__-
             
-            
-            if (arrowRight)
-            {
-                //rotate
-                velocity.Angular.z = -deltaTime * 90 * math.min((int)predatorComponent.Speed, 3);
-            }
-            if (arrowLeft)
-            {
-                //rotate
-                velocity.Angular.z = deltaTime * 90 * math.min((int)predatorComponent.Speed, 3);
-            }
             float3 forward = math.mul(rotation.Value, new float3(0, 1, 0));
-            if (arrowUp)
+            if (_manualMovement)
             {
-                // move up
-                velocity.Linear = forward  * 2 * (int)predatorComponent.Speed;
-            }
-            if (arrowDown)
-            {
-                // move down
-                velocity.Linear = -forward * 2 * (int)predatorComponent.Speed;
-            }
 
-            
-            DynamicBuffer<float> _outputs = outputs.Reinterpret<float>(); //brain.FeedForward(_inputs);
+                if (arrowRight)
+                {
+                    //rotate
+                    velocity.Angular.z = -deltaTime * 90 * 2 * math.min((int)predatorComponent.Speed, 3);
+                }
+                if (arrowLeft)
+                {
+                    //rotate
+                    velocity.Angular.z = deltaTime * 90 * 2 * math.min((int)predatorComponent.Speed, 3);
+                }
+                
+                if (arrowUp)
+                {
+                    // move up
+                    velocity.Linear = forward  * 2 * (int)predatorComponent.Speed;
+                }
+                if (arrowDown)
+                {
+                    // move down
+                    velocity.Linear = -forward * 2 * (int)predatorComponent.Speed;
+                }
 
-            float angularVelocity = _outputs[0];
-            float linearVelocity = _outputs[1];
+                if ((!arrowUp && !arrowRight && !arrowLeft && !arrowDown))
+                {
+                    //if (predatorComponent.Energy <= 100)
+                    //    predatorComponent.Energy = math.min(predatorComponent.Energy + 5f * deltaTime, 100);
+                }
+                else
+                {
+                    predatorComponent.Energy -= energyLoss * deltaTime;
+                }
+            }
+            else 
+            {
+                DynamicBuffer<float> _outputs = outputs.Reinterpret<float>(); //brain.FeedForward(_inputs);
 
-            if ((angularVelocity == 0f && linearVelocity == 0f && !arrowUp && !arrowRight && !arrowLeft && !arrowDown))
-            {
-                //if (predatorComponent.Energy <= 100)
-                //    predatorComponent.Energy = math.min(predatorComponent.Energy + 5f * deltaTime, 100);
-            }
-            else
-            {
-                predatorComponent.Energy -= energyLoss * deltaTime * math.max(math.max(math.abs(angularVelocity), math.abs(linearVelocity)), 0.3f);
-            }
+                float angularVelocity = _outputs[0];
+                float linearVelocity = _outputs[1];
 
-            
-
-            //float3 forward = math.mul(rotation.Value, new float3(0, 1, 0));
-            //Debug.Log("linearVelocity: " + linearVelocity + " forward " + forward  + " deltatime " +  deltaTime + " speed: " + (int)predatorComponent.Speed);
-            //Debug.Log("linearVelocity update: " + forward * deltaTime * 2 * (int)predatorComponent.Speed * linearVelocity + " non-vector: " + deltaTime * 2 * (int)predatorComponent.Speed * linearVelocity);
-            //Debug.Log("angularVelocity: " + angularVelocity);
-            translation.Value += forward * deltaTime * 2 * (int)predatorComponent.Speed * linearVelocity;
-            rotation.Value = math.mul(rotation.Value, quaternion.RotateZ(math.radians(deltaTime * 90 * math.min((int)predatorComponent.Speed, 3) * angularVelocity)));
-            if (float.IsNaN(translation.Value.x))
-            {
-                //Debug.Log("translation is NaN");
-                return;
+                if ((angularVelocity == 0f && linearVelocity == 0f))
+                {
+                    //if (predatorComponent.Energy <= 100)
+                    //    predatorComponent.Energy = math.min(predatorComponent.Energy + 5f * deltaTime, 100);
+                }
+                else
+                {
+                    predatorComponent.Energy -= energyLoss * deltaTime * math.max(math.max(math.abs(angularVelocity), math.abs(linearVelocity)), 0.3f);
+                }
+                
+                //float3 forward = math.mul(rotation.Value, new float3(0, 1, 0));
+                //Debug.Log("linearVelocity: " + linearVelocity + " forward " + forward  + " deltatime " +  deltaTime + " speed: " + (int)predatorComponent.Speed);
+                //Debug.Log("linearVelocity update: " + forward * deltaTime * 2 * (int)predatorComponent.Speed * linearVelocity + " non-vector: " + deltaTime * 2 * (int)predatorComponent.Speed * linearVelocity);
+                //Debug.Log("angularVelocity: " + angularVelocity);
+                //translation.Value += forward * deltaTime * 2 * (int)predatorComponent.Speed * linearVelocity;
+                //rotation.Value = math.mul(rotation.Value, quaternion.RotateZ(math.radians(deltaTime * 90 * math.min((int)predatorComponent.Speed, 3) * angularVelocity)));
+                if (float.IsNaN(translation.Value.x))
+                {
+                    //Debug.Log("translation is NaN");
+                    return;
+                }
+                float3 forwardMove = forward * 2 * (int)predatorComponent.Speed * linearVelocity;
+                if (float.IsNaN(forwardMove.x) || float.IsNaN(forwardMove.y) || float.IsNaN(forwardMove.z) || float.IsNaN(deltaTime * 90 * 2 * (int)predatorComponent.Speed * angularVelocity))
+                {
+                    //Debug.Log("forwardMove is NaN: " + forwardMove + " deltaTime: " + deltaTime + " angularVelocity: " + angularVelocity);
+                    return;
+                }
+                velocity.Linear = forward * 2 * (int)predatorComponent.Speed * linearVelocity;
+                velocity.Angular.z = deltaTime * 90 * 2 * (int)predatorComponent.Speed * angularVelocity;
             }
-            float3 forwardMove = forward * 2 * (int)predatorComponent.Speed * linearVelocity;
-            if (float.IsNaN(forwardMove.x) || float.IsNaN(forwardMove.y) || float.IsNaN(forwardMove.z) || float.IsNaN(deltaTime * 90 * 2 * (int)predatorComponent.Speed * angularVelocity))
-            {
-                //Debug.Log("forwardMove is NaN: " + forwardMove + " deltaTime: " + deltaTime + " angularVelocity: " + angularVelocity);
-                return;
-            }
-            //velocity.Linear = forward * 2 * (int)predatorComponent.Speed * linearVelocity;
-            //velocity.Angular.z = deltaTime * 90 * 2 * (int)predatorComponent.Speed * angularVelocity;
 
             //transform.Translate(Vector2.up * deltaTime * 2 * (int)predatorComponent.Speed * linearVelocity);
             //transform.Rotate(new Vector3(0, 0, angularVelocity) * deltaTime * 90 * 2 * (int)predatorComponent.Speed);
@@ -177,9 +195,10 @@ public partial class ActionPredatorSystem : SystemBase
         Dependency.Complete();
 
         EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.TempJob);
-        EntityCommandBuffer.ParallelWriter parallelEcb = ecb.AsParallelWriter();
+        //EntityCommandBuffer.ParallelWriter parallelEcb = ecb.AsParallelWriter();
         Entities
         .WithAll<PredatorTag>()
+        .WithoutBurst()
         .ForEach((Entity e, int entityInQueryIndex, ref Translation translation, ref PredatorComponent predatorComponent, ref DynamicBuffer<LayerDataElement> layers, ref DynamicBuffer<NeuronDataElement> neurons, ref DynamicBuffer<BiasDataElement> biases, ref DynamicBuffer<WeightDataElement> weights) => {
             //if ((int)predatorComponent.Fitness % 5 == 0 && (math.floor(predatorComponent.Fitness) / 5) > predatorComponent._counterReproduction && SceneInitializerECS.NUMpredator < SceneInitializerECS.MAXpredatorALLOWED)
             // if (predatorComponent.Alive == false || predatorComponent.Energy <= 0)
@@ -201,14 +220,19 @@ public partial class ActionPredatorSystem : SystemBase
                 float randomRotationAngle = random.NextFloat(0, 360); //UnityEngine.Random.Range(0.0f, 360.0f);
                 quaternion randomRotation = quaternion.Euler(0.0f, 0.0f, math.radians(randomRotationAngle));
                 //print("Random rotation " + randomRotationAngle);
-                Entity child = parallelEcb.CreateEntity(entityInQueryIndex, SceneInitializerECS.PredatorArchetype);
-                parallelEcb.SetComponent(entityInQueryIndex, child, new Translation { Value = new float3(randomPosition.x, randomPosition.y, 0) });
-                parallelEcb.SetComponent(entityInQueryIndex, child, new Rotation { Value = randomRotation });
+                // Entity child = parallelEcb.CreateEntity(entityInQueryIndex, SceneInitializerECS.PredatorArchetype);
+                // parallelEcb.SetComponent(entityInQueryIndex, child, new Translation { Value = new float3(randomPosition.x, randomPosition.y, 0) });
+                // parallelEcb.SetComponent(entityInQueryIndex, child, new Rotation { Value = randomRotation });
+
+                Entity child = ecb.CreateEntity(SceneInitializerECS.PredatorArchetype);
+                ecb.SetComponent(child, new Translation { Value = new float3(randomPosition.x, randomPosition.y, 0) });
+                ecb.SetComponent(child, new Rotation { Value = randomRotation });
 
                 //child.GetComponent<predator>().Start();
                 //child.name = "predator";
 
-                parallelEcb.SetComponent<PredatorComponent>(entityInQueryIndex, child, new PredatorComponent {
+                //parallelEcb.SetComponent<PredatorComponent>(entityInQueryIndex, child, new PredatorComponent {
+                ecb.SetComponent<PredatorComponent>(child, new PredatorComponent {
                     Alive = true,
                     Lifepoints = 100,
                     Fitness = 0f,
@@ -220,23 +244,33 @@ public partial class ActionPredatorSystem : SystemBase
                     //_numRays = SceneInitializerECS.numRaysPredators,
                     //_energyExhausted = false,
                     _dmg = dmgPredators,
+                    _timerStopCollision = 0f
 
                 });
 
-                parallelEcb.SetComponent(entityInQueryIndex, child, new RaycastComponent() { 
+                //parallelEcb.SetComponent(entityInQueryIndex, child, new RaycastComponent() { 
+                ecb.SetComponent(child, new RaycastComponent() { 
                         //physicsWorld = buildPhysicsWorld.PhysicsWorld,
                         _numberOfRays = numRaysPredators,
                         _fov = fovPredators,
                         _viewRange = viewRangePredators,
                         toggleShowRays = false
                 });
-                DynamicBuffer<DistanceDataElement> distancesChild = parallelEcb.AddBuffer<DistanceDataElement>(entityInQueryIndex, child);
-                DynamicBuffer<WhoIsThereDataElement> whoIsThereChild = parallelEcb.AddBuffer<WhoIsThereDataElement>(entityInQueryIndex, child);
-                DynamicBuffer<LayerDataElement> layersChild = parallelEcb.AddBuffer<LayerDataElement>(entityInQueryIndex, child);
-                DynamicBuffer<NeuronDataElement> neuronsChild = parallelEcb.AddBuffer<NeuronDataElement>(entityInQueryIndex, child);
-                DynamicBuffer<WeightDataElement> weightsChild = parallelEcb.AddBuffer<WeightDataElement>(entityInQueryIndex, child);
-                DynamicBuffer<BiasDataElement> biasesChild = parallelEcb.AddBuffer<BiasDataElement>(entityInQueryIndex, child);
-                DynamicBuffer<OutputDataElement> outputsChild = parallelEcb.AddBuffer<OutputDataElement>(entityInQueryIndex, child);
+                // DynamicBuffer<DistanceDataElement> distancesChild = parallelEcb.AddBuffer<DistanceDataElement>(entityInQueryIndex, child);
+                // DynamicBuffer<WhoIsThereDataElement> whoIsThereChild = parallelEcb.AddBuffer<WhoIsThereDataElement>(entityInQueryIndex, child);
+                // DynamicBuffer<LayerDataElement> layersChild = parallelEcb.AddBuffer<LayerDataElement>(entityInQueryIndex, child);
+                // DynamicBuffer<NeuronDataElement> neuronsChild = parallelEcb.AddBuffer<NeuronDataElement>(entityInQueryIndex, child);
+                // DynamicBuffer<WeightDataElement> weightsChild = parallelEcb.AddBuffer<WeightDataElement>(entityInQueryIndex, child);
+                // DynamicBuffer<BiasDataElement> biasesChild = parallelEcb.AddBuffer<BiasDataElement>(entityInQueryIndex, child);
+                // DynamicBuffer<OutputDataElement> outputsChild = parallelEcb.AddBuffer<OutputDataElement>(entityInQueryIndex, child);
+
+                DynamicBuffer<DistanceDataElement> distancesChild = ecb.AddBuffer<DistanceDataElement>( child);
+                DynamicBuffer<WhoIsThereDataElement> whoIsThereChild = ecb.AddBuffer<WhoIsThereDataElement>( child);
+                DynamicBuffer<LayerDataElement> layersChild = ecb.AddBuffer<LayerDataElement>( child);
+                DynamicBuffer<NeuronDataElement> neuronsChild = ecb.AddBuffer<NeuronDataElement>( child);
+                DynamicBuffer<WeightDataElement> weightsChild = ecb.AddBuffer<WeightDataElement>( child);
+                DynamicBuffer<BiasDataElement> biasesChild = ecb.AddBuffer<BiasDataElement>( child);
+                DynamicBuffer<OutputDataElement> outputsChild = ecb.AddBuffer<OutputDataElement>( child);
                 distancesChild.ResizeUninitialized(numRaysPredators);
                 whoIsThereChild.ResizeUninitialized(numRaysPredators);
                 weightsChild.ResizeUninitialized(numWeightsPredators);
@@ -278,15 +312,18 @@ public partial class ActionPredatorSystem : SystemBase
 
                 // end mutate function
 
-                parallelEcb.SetSharedComponent(entityInQueryIndex, child, new RenderMesh() { 
+                //parallelEcb.SetSharedComponent(entityInQueryIndex, child, new RenderMesh() { 
+                ecb.SetSharedComponent(child, new RenderMesh() { 
                     mesh = meshAgent,
                     material = materialPredator,
                     layerMask = 1
                 });
 
-                parallelEcb.SetComponent(entityInQueryIndex, child, new URPMaterialPropertyBaseColor {Value = new float4(1f, 0f, 0, 1)});
+                //parallelEcb.SetComponent(entityInQueryIndex, child, new URPMaterialPropertyBaseColor {Value = new float4(1f, 0f, 0, 1)});
+                ecb.SetComponent(child, new URPMaterialPropertyBaseColor {Value = new float4(1f, 0f, 0, 1)});
 
-                parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsMass {
+                //parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsMass {
+                ecb.SetComponent(child, new PhysicsMass {
                     InverseMass = 1f,
                     InverseInertia = new float3(1f, 1f, 1f),
                     Transform = RigidTransform.identity
@@ -301,15 +338,16 @@ public partial class ActionPredatorSystem : SystemBase
                     //Restitution = Unity.Physics.Material.Default.Restitution,
                     //RestitutionCombinePolicy = Unity.Physics.Material.Default.RestitutionCombinePolicy,
                 };
-                var collisionFilter = new Unity.Physics.CollisionFilter
-                {
-                    BelongsTo = ~0u,
-                    CollidesWith = ~0u,
-                    GroupIndex = 0
-                };
+                // var collisionFilter = new Unity.Physics.CollisionFilter
+                // {
+                //     BelongsTo = ~0u,
+                //     CollidesWith = ~0u,
+                //     GroupIndex = 0
+                // };
 
 
-                parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsCollider { Value = Unity.Physics.SphereCollider.Create(new SphereGeometry() { 
+                // parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsCollider { Value = Unity.Physics.SphereCollider.Create(new SphereGeometry() { 
+                ecb.SetComponent(child, new PhysicsCollider { Value = Unity.Physics.SphereCollider.Create(new SphereGeometry() { 
                     Center = new float3(0f, 0f, 0f),
                     Radius = 0.5f,
 
@@ -323,13 +361,15 @@ public partial class ActionPredatorSystem : SystemBase
                 //     SideCount = 3
                 // }, Unity.Physics.CollisionFilter.Default) });
 
-                parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsDamping()
+                //parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsDamping()
+                ecb.SetComponent(child, new PhysicsDamping()
                 {
                     Linear = 4f,
                     Angular = 4f
                 });
 
-                parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsGravityFactor()
+                //parallelEcb.SetComponent(entityInQueryIndex, child, new PhysicsGravityFactor()
+                ecb.SetComponent(child, new PhysicsGravityFactor()
                 {
                     Value = 0f
                 });
@@ -344,12 +384,14 @@ public partial class ActionPredatorSystem : SystemBase
                     predatorComponent.Fitness = -1;
                     //Counter--;
                     SceneInitializerECS.NUMPREDATOR--;
-                    parallelEcb.DestroyEntity(entityInQueryIndex, e);
+                    //parallelEcb.DestroyEntity(entityInQueryIndex, e);
+                    ecb.DestroyEntity(e);
                 }
             }
             if (predatorComponent.Alive == false || predatorComponent.Energy <= 0)
             {
-                parallelEcb.DestroyEntity(entityInQueryIndex, e);
+                //parallelEcb.DestroyEntity(entityInQueryIndex, e);
+                ecb.DestroyEntity(e);
                 SceneInitializerECS.NUMPREDATOR--;
             }
 
@@ -371,7 +413,7 @@ public partial class ActionPredatorSystem : SystemBase
             //         parallelEcb.SetComponent(entityInQueryIndex, e, new URPMaterialPropertyBaseColor {Value = new float4(0, 1f, 0, 1)});
             //     //}
             // }
-        }).WithoutBurst().Run();
+        }).Run();
 
         Dependency.Complete();
         //Debug.Log("predator count: " + SceneInitializerECS.NUMpredator);

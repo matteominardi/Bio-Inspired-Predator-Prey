@@ -53,8 +53,8 @@ public partial class CollisionSystem : SystemBase
 
         var dependencies = JobHandle.CombineDependencies(this.Dependency, _stepPhysicsWorld.FinalSimulationJobHandle);
         Dependency = job.Schedule(_stepPhysicsWorld.Simulation, dependencies);
-        commandBufferSystem.AddJobHandleForProducer(Dependency);
-        Dependency.Complete();
+        //commandBufferSystem.AddJobHandleForProducer(Dependency);
+        //Dependency.Complete();
         //SceneInitializerECS.NUMPREY = results[0];
         //SceneInitializerECS.NUMPREDATOR = results[1];
         //Debug.Log("num preys: " + SceneInitializerECS.NUMPREY + " num predators: " + SceneInitializerECS.NUMPREDATOR);
@@ -98,8 +98,20 @@ public partial class CollisionSystem : SystemBase
             PreyComponent preyComponent = preyComponentGroup[preyEntity];
             PredatorComponent predatorComponent = predatorComponentGroup[predatorEntity];
 
+            float _timerStopCollisionPrey = preyComponent._timerStopCollision;
+            float _timerStopCollisionPredator = predatorComponent._timerStopCollision;
+
+            if (_timerStopCollisionPrey > 0 && _timerStopCollisionPredator > 0)
+            {
+                return;
+            }
+            preyComponent._timerStopCollision = 0.5f;
+            predatorComponent._timerStopCollision = 0.5f;
+
             preyComponent.Lifepoints -= predatorComponent._dmg;
             predatorComponent.Lifepoints -= preyComponent._dmg;
+
+
 
             //Debug.Log("predator lifepoints: " + predatorComponent.Lifepoints + " prey lifepoints: " + preyComponent.Lifepoints + " predator dmg: " + predatorComponent._dmg + " prey dmg: " + preyComponent._dmg);
             if (preyComponent.Lifepoints <= 0)
@@ -110,8 +122,7 @@ public partial class CollisionSystem : SystemBase
                 predatorComponent.Energy = math.min(predatorComponent.Energy + 10, 100);
                 predatorComponent.Lifepoints = math.min(predatorComponent.Lifepoints + (int)(reproductionGainPredators*1.5f), 100);
                 predatorComponent.ReproductionFactor += reproductionGainPredators;
-                preyComponentGroup[preyEntity] = preyComponent;
-                predatorComponentGroup[predatorEntity] = predatorComponent;
+                
                 //commandBuffer.DestroyEntity(preyEntity);
                 //results[0] = numPrey - 1;//SceneInitializerECS.NUMPREY--;
                 //Debug.Log("scene init num prey: " + SceneInitializerECS.NUMPREY + " num predator: " + SceneInitializerECS.NUMPREDATOR);
@@ -124,11 +135,13 @@ public partial class CollisionSystem : SystemBase
                 predatorComponent.Alive = false;
                 predatorComponent.Fitness = -1;
                 predatorComponent.Lifepoints = 0;
-                predatorComponentGroup[predatorEntity] = predatorComponent;
+                //predatorComponentGroup[predatorEntity] = predatorComponent;
                 //commandBuffer.DestroyEntity(predatorEntity);
                 //SceneInitializerECS.NUMPREDATOR--;
                 //results[1] = numPredator - 1;
             }
+            preyComponentGroup[preyEntity] = preyComponent;
+            predatorComponentGroup[predatorEntity] = predatorComponent;
             // preyComponentGroup[preyEntity] = preyComponent;
             // predatorComponentGroup[predatorEntity] = predatorComponent;
             //predatorComponent.Energy += predatorComponent._dmg;
