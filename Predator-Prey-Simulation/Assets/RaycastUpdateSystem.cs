@@ -25,7 +25,8 @@ public partial class RaycastUpdateSystem : SystemBase
     BuildPhysicsWorld buildPhysicsWorld;
     CollisionWorld collisionWorld;
     EntityArchetype archetypePrey;
-    // static readonly ProfilerMarker s_PreparePerfMarker = new ProfilerMarker("RaycastSystemJob");
+    //static readonly ProfilerMarker s_PreparePerfMarker = new ProfilerMarker("RaycastSystemJob");
+    //static readonly ProfilerMarker s_HasCompPerfMarker = new ProfilerMarker("HasComponent");
     // static readonly ProfilerMarker s_MathPerfMarker = new ProfilerMarker("RaycastMathSystemJob");
     // static readonly ProfilerMarker s_RaycastShootPerfMarker = new ProfilerMarker("RaycastShootSystemJob");
     // static readonly ProfilerMarker s_RaycastDrawRayMarker = new ProfilerMarker("RaycastDrawRaySystemJob");
@@ -244,7 +245,7 @@ public partial class RaycastUpdateSystem : SystemBase
         .WithReadOnly(collisionWorld)
         //.WithReadOnly(buildPhysicsWorldBodies)
         //.WithReadOnly(entityManager)
-        .ForEach((Entity entity, ref Translation translation, ref Rotation rotation, ref RaycastComponent raycastComponent, ref DynamicBuffer<DistanceDataElement> distances, ref DynamicBuffer<WhoIsThereDataElement> whosThere) => {
+        .ForEach((Entity entity, ref RaycastComponent raycastComponent, ref DynamicBuffer<DistanceDataElement> distances, ref DynamicBuffer<WhoIsThereDataElement> whosThere, in Translation translation, in Rotation rotation) => {
         //     // Implement the work to perform for each entity here.
         //     // You should only access data that is local or that is a
         //     // field on this job. Note that the 'rotation' parameter is
@@ -258,22 +259,28 @@ public partial class RaycastUpdateSystem : SystemBase
             var pos = translation.Value;
             //entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
+            float3 up = math.up();
+            float step = raycastComponent._step;//(float)raycastComponent._fov / (float)(raycastComponent._numberOfRays - 1);
+            float3 rotatedUp = math.rotate(rotation.Value, up);
+            float magnitude = rotatedUp.x * rotatedUp.x + rotatedUp.y * rotatedUp.y + rotatedUp.z * rotatedUp.z;
+            float cosineAngle = (math.acos(math.clamp(math.dot(rotatedUp, up) / (magnitude), -1.0f, 1.0f)));
+
+            CollisionFilter collisionFilter = new CollisionFilter {
+                BelongsTo = ~((1u << 6) | (1u << 5)),
+                CollidesWith = ~((1u << 6) | (1u << 5)),
+                GroupIndex = 0
+            };
             for (int i = 0; i < raycastComponent._numberOfRays; i++)
             {
 
                 //s_MathPerfMarker.Begin();
-                float step = (float)raycastComponent._fov / (float)(raycastComponent._numberOfRays - 1);
-                float3 up = math.up();
-                float3 rotatedUp = math.rotate(rotation.Value, up);
-                float magnitude = rotatedUp.x * rotatedUp.x + rotatedUp.y * rotatedUp.y + rotatedUp.z * rotatedUp.z;
-                float cosineAngle = (math.acos(math.clamp(math.dot(rotatedUp, up) / (magnitude), -1.0f, 1.0f)));
                 float angle = (float)((float)i * step  + cosineAngle) % 360.0f - (float)raycastComponent._fov * 0.5f;
                 float3 dir = math.mul(quaternion.AxisAngle(math.forward(), math.radians(angle)), rotatedUp);
                 //Debug.Log("step " + step + " cosineanlge "+ cosineAngle +" angle " + angle + " dir " + dir + " rotatedUp " + rotatedUp + " magnitude " + magnitude + " cosineAngle " + cosineAngle);
                 
                 //Unity.Physics.RaycastHit raycastHit = new Unity.Physics.RaycastHit();
                 //NativeList<Unity.Physics.RaycastHit> raycastHits = new NativeList<Unity.Physics.RaycastHit>(Allocator.Temp);
-                float3 end = pos + math.normalize(dir) * raycastComponent._viewRange;
+                float3 end = pos + dir * raycastComponent._viewRange;
                 // if (float.IsNaN(dir.x))
                 //     Debug.Log("dot " + math.dot(rotatedUp, up) + " division " + math.dot(rotatedUp, up)/magnitude + " magnitude " + magnitude + " cosineAngle " + cosineAngle);
                     //Debug.Log("angle " + angle + " rad " + math.radians(angle) + " dir " + dir + " rotatedUp " + rotatedUp + " magnitude " + magnitude + " cosineAngle " + cosineAngle);
@@ -282,11 +289,7 @@ public partial class RaycastUpdateSystem : SystemBase
                 RaycastInput raycastInput = new RaycastInput {
                     Start = pos,
                     End = end,
-                    Filter = new CollisionFilter {
-                        BelongsTo = ~((1u << 6) | (1u << 5)),
-                        CollidesWith = ~((1u << 6) | (1u << 5)),
-                        GroupIndex = 0
-                    }
+                    Filter = collisionFilter
                 };
 
 
@@ -326,6 +329,7 @@ public partial class RaycastUpdateSystem : SystemBase
                     //ComponentDataFromEntity<PreyComponent> preyComponents = GetComponentDataFromEntity<PreyComponent>(true);
                     
                     //if (entityManager.HasComponent<PreyComponent>(hitEntity))
+                    //s_HasCompPerfMarker.Begin();
                     if (HasComponent<PreyComponent>(hitEntity))
                     {
                         whosThereTemp = 1.0f;
@@ -337,6 +341,7 @@ public partial class RaycastUpdateSystem : SystemBase
                         color = Color.red;
 
                     }
+                    //s_HasCompPerfMarker.End();
                     //WhoIsThereDataElement initWhosThere = whosThere[i];
                     //initWhosThere.Value = whosThereTemp;
                     whosThere[i] = new WhoIsThereDataElement { Value = whosThereTemp };

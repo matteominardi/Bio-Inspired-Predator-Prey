@@ -121,7 +121,7 @@ public partial class CollisionSystem : SystemBase
                 predatorComponent.Fitness += 5;
                 predatorComponent.Energy = math.min(predatorComponent.Energy + 10, 100);
                 predatorComponent.Lifepoints = math.min(predatorComponent.Lifepoints + (int)(reproductionGainPredators*1.5f), 100);
-                predatorComponent.ReproductionFactor += reproductionGainPredators;
+                predatorComponent.ReproductionFactor = math.min(predatorComponent.ReproductionFactor + reproductionGainPredators, 110);
                 
                 //commandBuffer.DestroyEntity(preyEntity);
                 //results[0] = numPrey - 1;//SceneInitializerECS.NUMPREY--;
@@ -135,6 +135,7 @@ public partial class CollisionSystem : SystemBase
                 predatorComponent.Alive = false;
                 predatorComponent.Fitness = -1;
                 predatorComponent.Lifepoints = 0;
+                predatorComponent.ReproductionFactor = 0;
                 //predatorComponentGroup[predatorEntity] = predatorComponent;
                 //commandBuffer.DestroyEntity(predatorEntity);
                 //SceneInitializerECS.NUMPREDATOR--;

@@ -25,6 +25,10 @@ public partial class ActionPredatorSystem : SystemBase
     public Mesh meshAgent;
     public UnityEngine.Material materialPredator;
     private float _energyLoss;
+    private EndSimulationEntityCommandBufferSystem commandBufferSystem;
+    private float _angularVelocityFactor;
+    private float _linearVelocityFactor;
+
 
     //private MovementInputActions _inputActions;
     //private EntityCommandBufferSystem _ecb;
@@ -60,6 +64,9 @@ public partial class ActionPredatorSystem : SystemBase
         _energyLoss = SceneInitializerECS.energyLossPredators;
         //_reproductionGain = SceneInitializerECS.reprodGainWhenEatPredators;
         //_ecb = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        commandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        _angularVelocityFactor = 0.008f * 90 * math.min(speedPredators, 6f);
+        _linearVelocityFactor = speedPredators;
     }
     protected override void OnUpdate()
     {
@@ -76,6 +83,9 @@ public partial class ActionPredatorSystem : SystemBase
 
         float energyLoss = this._energyLoss;
         bool _manualMovement = SceneInitializerECS.ManualMovement;
+        float _angularVelocityFactor = this._angularVelocityFactor;
+        float _linearVelocityFactor = this._linearVelocityFactor;
+
         Entities
         .WithAll<PredatorTag>()
         .ForEach((Entity e, ref Translation translation, ref PhysicsVelocity velocity, ref PredatorComponent predatorComponent,  ref Rotation rotation, ref DynamicBuffer<OutputDataElement> outputs) => {
@@ -119,23 +129,23 @@ public partial class ActionPredatorSystem : SystemBase
                 if (arrowRight)
                 {
                     //rotate
-                    velocity.Angular.z = -deltaTime * 90 * 2 * math.min((int)predatorComponent.Speed, 3);
+                    velocity.Angular.z = -_angularVelocityFactor;
                 }
                 if (arrowLeft)
                 {
                     //rotate
-                    velocity.Angular.z = deltaTime * 90 * 2 * math.min((int)predatorComponent.Speed, 3);
+                    velocity.Angular.z = _angularVelocityFactor;
                 }
                 
                 if (arrowUp)
                 {
                     // move up
-                    velocity.Linear = forward  * 2 * (int)predatorComponent.Speed;
+                    velocity.Linear = forward * _linearVelocityFactor;
                 }
                 if (arrowDown)
                 {
                     // move down
-                    velocity.Linear = -forward * 2 * (int)predatorComponent.Speed;
+                    velocity.Linear = -forward * _linearVelocityFactor;
                 }
 
                 if ((!arrowUp && !arrowRight && !arrowLeft && !arrowDown))
@@ -171,19 +181,19 @@ public partial class ActionPredatorSystem : SystemBase
                 //Debug.Log("angularVelocity: " + angularVelocity);
                 //translation.Value += forward * deltaTime * 2 * (int)predatorComponent.Speed * linearVelocity;
                 //rotation.Value = math.mul(rotation.Value, quaternion.RotateZ(math.radians(deltaTime * 90 * math.min((int)predatorComponent.Speed, 3) * angularVelocity)));
-                if (float.IsNaN(translation.Value.x))
-                {
-                    //Debug.Log("translation is NaN");
-                    return;
-                }
-                float3 forwardMove = forward * 2 * (int)predatorComponent.Speed * linearVelocity;
-                if (float.IsNaN(forwardMove.x) || float.IsNaN(forwardMove.y) || float.IsNaN(forwardMove.z) || float.IsNaN(deltaTime * 90 * 2 * (int)predatorComponent.Speed * angularVelocity))
-                {
-                    //Debug.Log("forwardMove is NaN: " + forwardMove + " deltaTime: " + deltaTime + " angularVelocity: " + angularVelocity);
-                    return;
-                }
-                velocity.Linear = forward * 2 * (int)predatorComponent.Speed * linearVelocity;
-                velocity.Angular.z = deltaTime * 90 * 2 * (int)predatorComponent.Speed * angularVelocity;
+                // if (float.IsNaN(translation.Value.x))
+                // {
+                //     //Debug.Log("translation is NaN");
+                //     return;
+                // }
+                // float3 forwardMove = forward * 2 * predatorComponent.Speed * linearVelocity;
+                // if (float.IsNaN(forwardMove.x) || float.IsNaN(forwardMove.y) || float.IsNaN(forwardMove.z) || float.IsNaN(90 * 2 * predatorComponent.Speed * angularVelocity))
+                // {
+                //     //Debug.Log("forwardMove is NaN: " + forwardMove + " deltaTime: " + deltaTime + " angularVelocity: " + angularVelocity);
+                //     return;
+                // }
+                velocity.Linear = forward * _linearVelocityFactor * linearVelocity;
+                velocity.Angular.z = _angularVelocityFactor * angularVelocity;
             }
 
             //transform.Translate(Vector2.up * deltaTime * 2 * (int)predatorComponent.Speed * linearVelocity);
@@ -192,9 +202,11 @@ public partial class ActionPredatorSystem : SystemBase
             //GetComponent<Raycast>().UpdateRays();
 
         }).WithBurst().ScheduleParallel();//.WithBurst().ScheduleParallel();
-        Dependency.Complete();
+        //Dependency.Complete();
 
-        EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.TempJob);
+        //EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.TempJob);
+        //EntityCommandBuffer ecb = new EntityCommandBuffer(Allocator.TempJob);
+        EntityCommandBuffer ecb = commandBufferSystem.CreateCommandBuffer();
         //EntityCommandBuffer.ParallelWriter parallelEcb = ecb.AsParallelWriter();
         Entities
         .WithAll<PredatorTag>()
@@ -207,6 +219,9 @@ public partial class ActionPredatorSystem : SystemBase
             //     SceneInitializerECS.NUMPREDATOR--;
             //     return;
             // }
+            if (predatorComponent.Alive == false)
+                return;
+
             if (predatorComponent.Alive && predatorComponent.ReproductionFactor >= 100 && SceneInitializerECS.NUMPREDATOR < SceneInitializerECS.MAXPREDATORALLOWED)
             {
                 //predatorComponent._counterReproduction++;
@@ -254,7 +269,8 @@ public partial class ActionPredatorSystem : SystemBase
                         _numberOfRays = numRaysPredators,
                         _fov = fovPredators,
                         _viewRange = viewRangePredators,
-                        toggleShowRays = false
+                        toggleShowRays = false,
+                        _step = (float)fovPredators / (float)(numRaysPredators - 1)
                 });
                 // DynamicBuffer<DistanceDataElement> distancesChild = parallelEcb.AddBuffer<DistanceDataElement>(entityInQueryIndex, child);
                 // DynamicBuffer<WhoIsThereDataElement> whoIsThereChild = parallelEcb.AddBuffer<WhoIsThereDataElement>(entityInQueryIndex, child);
@@ -383,17 +399,17 @@ public partial class ActionPredatorSystem : SystemBase
                     predatorComponent.Alive = false;
                     predatorComponent.Fitness = -1;
                     //Counter--;
-                    SceneInitializerECS.NUMPREDATOR--;
+                    //SceneInitializerECS.NUMPREDATOR--;
                     //parallelEcb.DestroyEntity(entityInQueryIndex, e);
-                    ecb.DestroyEntity(e);
+                    //ecb.DestroyEntity(e);
                 }
             }
-            if (predatorComponent.Alive == false || predatorComponent.Energy <= 0)
-            {
-                //parallelEcb.DestroyEntity(entityInQueryIndex, e);
-                ecb.DestroyEntity(e);
-                SceneInitializerECS.NUMPREDATOR--;
-            }
+            // if (predatorComponent.Alive == false || predatorComponent.Energy <= 0)
+            // {
+            //     //parallelEcb.DestroyEntity(entityInQueryIndex, e);
+            //     ecb.DestroyEntity(e);
+            //     SceneInitializerECS.NUMPREDATOR--;
+            // }
 
             // if (predatorComponent._energyExhausted)
             // {
@@ -414,11 +430,12 @@ public partial class ActionPredatorSystem : SystemBase
             //     //}
             // }
         }).Run();
-
-        Dependency.Complete();
+        
+        commandBufferSystem.AddJobHandleForProducer(Dependency);
+        //Dependency.Complete();
         //Debug.Log("predator count: " + SceneInitializerECS.NUMpredator);
-        ecb.Playback(this.EntityManager);
-        ecb.Dispose();
+        //ecb.Playback(this.EntityManager);
+        //ecb.Dispose();
     }
 
     // public void Reproduce(Translation translation, int generation, DynamicBuffer<BiasDataElement> biasesParent, DynamicBuffer<WeightDataElement> weightsParent, EntityCommandBuffer.ParallelWriter ecb, int entityInQueryIndex) 

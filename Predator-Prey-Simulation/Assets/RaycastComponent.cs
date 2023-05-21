@@ -44,6 +44,7 @@ public struct RaycastComponent : IComponentData
     //public float[] Distances;
     //public float[] WhoIsThere;
     public bool toggleShowRays;
+    public float _step;
 
     //[SerializeField] private LayerMask layerMask;
 

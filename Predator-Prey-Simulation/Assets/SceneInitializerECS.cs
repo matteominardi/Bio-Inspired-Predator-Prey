@@ -34,25 +34,25 @@ public class SceneInitializerECS : MonoBehaviour
     public GameObject Background;
 
     public static int NUMPREY = 4000;
-    public static int NUMPREDATOR = 4000;
-    public static int MAXPREYALLOWED = 6000;
+    public static int NUMPREDATOR = 3000;
+    public static int MAXPREYALLOWED = 7000;
     public static int MAXPREDATORALLOWED = 6000;
     public static bool loadPretrained = false;
     public static int mapSize = 80; // scale is 1:10 (1 unit here = 5 units in the world) (eg. mapSize = 40 => 200x200 world)
-    public static int timerReproductionPreys = 5;
+    public static int timerReproductionPreys = 15;
     public static float energyGainPreys = 5.0f;
     public static float energyLossPredators = 1.0f;
-    public static float reprodGainWhenEatPredators = 30f;
-    public static float speedPreys = 3f;
-    public static float speedPredators = 2f;
+    public static float reprodGainWhenEatPredators = 60f;
+    public static float speedPreys = 5f;
+    public static float speedPredators = 4f;
     public static int dmgPreys = 15;
     public static int dmgPredators = 50;
-    public static int fovPreys = 300;
+    public static int fovPreys = 320;
     public static int fovPredators = 90;
     public static int numRaysPreys = 24;
     public static int numRaysPredators = 24;
-    public static int viewRangePreys = 60;
-    public static int viewRangePredators = 120;
+    public static int viewRangePreys = 120;
+    public static int viewRangePredators = 240;
     public static float mutationRate = 0.2f;
     public static float mutationAmount = 0.5f;
     public static float deviationAmount = 0.5f;
@@ -298,7 +298,9 @@ public class SceneInitializerECS : MonoBehaviour
                 _numberOfRays = numRaysPreys,
                 _fov = fovPreys,
                 _viewRange = viewRangePreys,
-                toggleShowRays = false
+                toggleShowRays = false,
+                _step = (float)fovPreys / (float)(numRaysPreys - 1)
+
             });
             entityManager.AddBuffer<DistanceDataElement>(entity);
             entityManager.AddBuffer<WhoIsThereDataElement>(entity);
@@ -444,7 +446,9 @@ public class SceneInitializerECS : MonoBehaviour
                 _numberOfRays = numRaysPredators,
                 _fov = fovPredators,
                 _viewRange = viewRangePredators,
-                toggleShowRays = false
+                toggleShowRays = false,
+                _step = (float)fovPredators / (float)(numRaysPredators - 1)
+
             });
             entityManager.AddBuffer<DistanceDataElement>(entity);
             entityManager.AddBuffer<WhoIsThereDataElement>(entity);

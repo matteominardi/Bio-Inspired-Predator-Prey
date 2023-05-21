@@ -156,8 +156,8 @@ public class Stats : MonoBehaviour
             collisionWorld = buildPhysicsWorld.PhysicsWorld.CollisionWorld;
             Unity.Physics.RaycastHit hit;
             //UnityEngine.RaycastHit hitUI;
-            collisionWorld.CastRay(raycastInput, out hit);
-            RaycastHit2D hitUI = Physics2D.GetRayIntersection(ray, Mathf.Infinity, layerMask);
+            //collisionWorld.CastRay(raycastInput, out hit);
+            //RaycastHit2D hitUI = Physics2D.GetRayIntersection(ray, Mathf.Infinity, layerMask);
             //Physics.Raycast(ray, out hit);
             if (collisionWorld.CastRay(raycastInput, out hit))
             {
@@ -319,7 +319,7 @@ public class Stats : MonoBehaviour
                         mainCamera.GetComponent<CameraController>().Reset(true);
                         visible = false;
                         transform.GetComponent<CanvasGroup>().alpha = 0;
-                        HideBrain(selectedEntity);
+                        HideBrain();
                     }
 
                 }
@@ -458,7 +458,7 @@ public class Stats : MonoBehaviour
 
     }
 
-    void HideBrain(Entity e)//ISelectable obj)
+    void HideBrain()//ISelectable obj)
     {
         for (int i = 0; i < Neurons.Length; i++)
         {
